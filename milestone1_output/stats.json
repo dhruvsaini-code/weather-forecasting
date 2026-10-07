@@ -1,66 +1,34 @@
 {
   "data_audit": {
-    "total_raw_observations": 264840,
-    "start_timestamp": "1996-01-01 00:00:00",
-    "end_timestamp": "2026-03-18 23:00:00",
-    "duplicate_timestamps": 264840,
-    "corrupt_timestamps": 0,
-    "variable_missing_pct": {
+    "raw_observations": 264840,
+    "start_date": "1996-01-01 00:00:00",
+    "end_date": "2026-03-18 23:00:00",
+    "duplicate_timestamps": 0,
+    "missing_values_pct": {
       "Temperature": 0.0,
-      "Precipitation": 0.0,
-      "Relative Humidity": 0.0,
+      "Rainfall": 0.0,
+      "Humidity": 0.0,
       "Wind Speed": 0.0,
-      "Atmospheric Pressure": 0.0
+      "Pressure": 0.0
     },
-    "frequency_inferred": "Hourly (1-hr)",
-    "expected_points": 264840,
-    "missing_timestamp_slots": 0,
-    "missing_timestamp_pct": 0.0,
-    "total_daily_observations": 11035,
-    "daily_missing_temperature_days": 0
+    "frequency": "Hourly",
+    "expected_slots": 264840,
+    "missing_slots": 0,
+    "missing_slots_pct": 0.0,
+    "daily_observations": 11035
   },
-  "time_series_statistics": {
-    "overall_mean_temp": 24.464717187735992,
-    "overall_std_temp": 7.0085733989203325,
-    "skewness_temp": -0.34800669540270707,
-    "kurtosis_temp": -0.9718641056965125,
-    "hottest_month_name": "Jun",
-    "hottest_month_mean": 32.83849537037037,
-    "coldest_month_name": "Jan",
-    "coldest_month_mean": 13.067265001734304,
-    "annual_thermal_range": 19.77123036863606,
-    "adf_statistic": -10.596385804303528,
-    "adf_pvalue": 6.333772449999288e-19,
-    "adf_critical_5pct": -2.8618029090873436,
-    "adf_is_stationary": true,
-    "kpss_statistic": 0.01580557880904781,
-    "kpss_pvalue": 0.1,
-    "kpss_critical_5pct": 0.463,
-    "kpss_is_stationary": true,
-    "autocorr_lag1": 0.9886627944505167,
-    "autocorr_lag7": 0.9303062977631538,
-    "autocorr_lag30": 0.7676219521827634,
-    "autocorr_lag365": 0.8844808350511402,
-    "seasonal_strength_Fs": 0.9342437691732104,
-    "trend_strength_Ft": 0.08277029223843291,
-    "residual_std_deviation": 1.7931541347697748,
-    "mean_annual_precipitation": 699.17,
-    "monsoon_precipitation_share_pct": 78.8554022201909,
-    "rainy_days_frequency_pct": 22.247394653375625,
-    "spearman_raw_temp_rain": 0.2447054683889546,
-    "spearman_deseasonal_anomaly_rain": -0.21418134833681565,
-    "season_medians": {
-      "Monsoon": 29.329166666666666,
-      "Post-monsoon": 23.077083333333334,
-      "Summer": 28.579166666666666,
-      "Winter": 14.633333333333333
-    },
-    "season_iqrs": {
-      "Monsoon": 3.226041666666667,
-      "Post-monsoon": 5.276041666666661,
-      "Summer": 8.18333333333333,
-      "Winter": 3.8354166666666654
-    },
-    "widest_variability_season": "Summer"
+  "eda_statistics": {
+    "tmean_overall": 24.393012384836126,
+    "hot_month": "Jun",
+    "cold_month": "Jan",
+    "hot_val": 32.8467037037037,
+    "cold_val": 12.902623135622616,
+    "annual_swing": 19.944080568081088,
+    "Fs": 0.9356087498184038,
+    "Ft": 0.08201002232688093,
+    "resid_sd": 1.7904804067127469,
+    "monsoon_share": 78.15975176417597,
+    "rho_raw": 0.2459773227372968,
+    "rho_anom": -0.20689783827717928
   }
 }
