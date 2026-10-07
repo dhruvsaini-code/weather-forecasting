@@ -346,19 +346,19 @@ if rain_col:
     FIGS["scatter"] = export_plot(fig7, "07_temp_vs_rain.png")
     print("      ✓ Figure 7: 07_temp_vs_rain.png")
 
-# 4.8 Combined Multi-Panel Overview Dashboard (All-in-One Graph Output)
-fig_dash = plt.figure(figsize=(15, 10))
-gs = fig_dash.add_gridspec(2, 3, hspace=0.32, wspace=0.28)
+# 4.8 Combined Multi-Panel Overview Dashboard (All 7 Figures in One View)
+fig_dash = plt.figure(figsize=(18, 12))
+gs = fig_dash.add_gridspec(3, 3, hspace=0.38, wspace=0.28)
 
-# Panel 1: Trend & MA
+# Figure 1: Trend & Moving Average
 ax_d1 = fig_dash.add_subplot(gs[0, :2])
 ax_d1.plot(daily.index, daily["tmean"], color=c_light, lw=0.5, alpha=0.8, label="Daily Mean Temp")
 ax_d1.plot(daily.index, daily["tmean"].rolling(30, center=True).mean(), color=c_or, lw=1.8, label="30-Day Moving Average")
 ax_d1.set_ylabel("Temperature (°C)", fontweight="bold")
-ax_d1.set_title("Long-Term Temperature Trajectory & 30-Day Centered Moving Average", fontsize=11, fontweight="bold", color=c_navy, loc="left")
+ax_d1.set_title("Figure 1: Long-Term Temperature Trajectory & 30-Day Centered Moving Average", fontsize=11, fontweight="bold", color=c_navy, loc="left")
 ax_d1.legend(loc="lower left", fontsize=8.5)
 
-# Panel 2: Seasonal Envelope
+# Figure 3: Climatological Envelope & Rain
 ax_d2 = fig_dash.add_subplot(gs[0, 2])
 if rain_col:
     ax_d2_r = ax_d2.twinx()
@@ -370,34 +370,52 @@ ax_d2.plot(range(1, 13), fp["avg"], color=c_or, lw=2.0, marker="o", markersize=4
 ax_d2.set_xticks(range(1, 13))
 ax_d2.set_xticklabels(MONTHS, fontsize=7.5)
 ax_d2.set_ylabel("Temp (°C)", fontsize=8.5, fontweight="bold")
-ax_d2.set_title("Climatological Envelope", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
+ax_d2.set_title("Figure 3: Climatological Envelope & Rainfall", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
 
-# Panel 3: Heatmap
-ax_d3 = fig_dash.add_subplot(gs[1, 0])
-sns.heatmap(thermal_matrix, cmap="YlOrRd", ax=ax_d3, cbar=False, xticklabels=MONTHS, yticklabels=5)
-ax_d3.tick_params(axis="x", labelsize=7.5)
-ax_d3.tick_params(axis="y", labelsize=7.5, rotation=0)
-ax_d3.set_title("Thermal Matrix (Year × Month)", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
+# Figure 5: STL Decomposition Components
+ax_d3 = fig_dash.add_subplot(gs[1, :2])
+ax_d3.plot(interpolated_series.index, interpolated_series.values, color=c_light, lw=0.5, alpha=0.5, label="Observed")
+ax_d3.plot(stl_decomposition.trend.index, stl_decomposition.trend.values, color=c_or, lw=1.6, label="Trend (Tt)")
+ax_d3.plot(stl_decomposition.seasonal.index, stl_decomposition.seasonal.values, color=c_mid, lw=0.8, alpha=0.8, label=f"Seasonal (St, Fs={S['Fs']:.2f})")
+ax_d3.set_ylabel("Temperature (°C)", fontsize=8.5, fontweight="bold")
+ax_d3.set_title(f"Figure 5: LOESS STL Decomposition (Period=365 Days, Fs={S['Fs']:.2f}, Ft={S['Ft']:.2f})", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
+ax_d3.legend(loc="lower left", fontsize=8)
 
-# Panel 4: Seasonal Boxplot
-ax_d4 = fig_dash.add_subplot(gs[1, 1])
-sns.boxplot(data=daily.dropna(subset=["tmean"]), x="season", y="tmean", order=SEASON_ORDER, ax=ax_d4, palette=["#9CC3E6", c_or, "#4C8BC2", "#E8B77A"], fliersize=1.5)
-ax_d4.set_ylabel("Temp (°C)", fontsize=8.5, fontweight="bold")
-ax_d4.set_xlabel("")
-ax_d4.set_title("Seasonal Temperature Distribution", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
+# Figure 2: Data Quality & Coverage Audit
+ax_d4 = fig_dash.add_subplot(gs[1, 2])
+cov_monthly = daily["n_obs"].resample("MS").sum()
+ax_d4.fill_between(cov_monthly.index, cov_monthly.values / cov_monthly.max() * 100, color=c_light, alpha=0.8)
+ax_d4.plot(cov_monthly.index, cov_monthly.values / cov_monthly.max() * 100, color=c_mid, lw=1.0)
+ax_d4.set_ylim(0, 105)
+ax_d4.set_ylabel("% Coverage", fontsize=8.5, fontweight="bold")
+ax_d4.set_title(f"Figure 2: Data Completeness Audit ({Q['raw_observations']:,} rows, 0 gaps)", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
 
-# Panel 5: Decomposition summary or Temp-Rain scatter
-ax_d5 = fig_dash.add_subplot(gs[1, 2])
+# Figure 4: Thermal Matrix Heatmap
+ax_d5 = fig_dash.add_subplot(gs[2, 0])
+sns.heatmap(thermal_matrix, cmap="YlOrRd", ax=ax_d5, cbar=False, xticklabels=MONTHS, yticklabels=5)
+ax_d5.tick_params(axis="x", labelsize=7.5)
+ax_d5.tick_params(axis="y", labelsize=7.5, rotation=0)
+ax_d5.set_title("Figure 4: Thermal Matrix (Year × Month)", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
+
+# Figure 6: Seasonal Boxplot
+ax_d6 = fig_dash.add_subplot(gs[2, 1])
+sns.boxplot(data=daily.dropna(subset=["tmean"]), x="season", y="tmean", order=SEASON_ORDER, ax=ax_d6, palette=["#9CC3E6", c_or, "#4C8BC2", "#E8B77A"], fliersize=1.5)
+ax_d6.set_ylabel("Temp (°C)", fontsize=8.5, fontweight="bold")
+ax_d6.set_xlabel("")
+ax_d6.set_title("Figure 6: Seasonal Temperature Distribution", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
+
+# Figure 7: Deseasonalized Temp vs Rain Anomaly
+ax_d7 = fig_dash.add_subplot(gs[2, 2])
 if rain_col:
-    ax_d5.scatter(clean_coupled["t_anom"], clean_coupled["rain"], s=3, alpha=0.25, color=c_or)
-    ax_d5.set_xlabel("Temp Anomaly (°C)", fontsize=8.5)
-    ax_d5.set_ylabel("Rainfall (mm)", fontsize=8.5)
-    ax_d5.set_title(f"Deseasonalized Rain Anomaly (ρ={S['rho_anom']:.2f})", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
+    ax_d7.scatter(clean_coupled["t_anom"], clean_coupled["rain"], s=3, alpha=0.25, color=c_or)
+    ax_d7.set_xlabel("Temp Anomaly (°C)", fontsize=8.5)
+    ax_d7.set_ylabel("Rainfall (mm)", fontsize=8.5)
+    ax_d7.set_title(f"Figure 7: Deseasonalized Rain Anomaly (ρ={S['rho_anom']:.2f})", fontsize=10.5, fontweight="bold", color=c_navy, loc="left")
 
-fig_dash.suptitle(f"{CONFIG['TITLE']} — Overview Visual Dashboard", fontsize=13, fontweight="bold", color=c_navy, y=0.98)
+fig_dash.suptitle(f"{CONFIG['TITLE']} — Complete 7-Figure Visual Dashboard", fontsize=13, fontweight="bold", color=c_navy, y=0.98)
 dash_path = export_plot(fig_dash, "00_overview_dashboard.png")
 FIGS["dashboard"] = dash_path
-print("      ✓ Dashboard: 00_overview_dashboard.png (Multi-Panel Visual Dashboard)")
+print("      ✓ Dashboard: 00_overview_dashboard.png (Complete 7-Figure Overview Dashboard)")
 
 # =====================================================================
 # 5. SYNOPSIS PRESENTATION BUILDER (RUBRIC-ALIGNED 12-SLIDE DECK)
