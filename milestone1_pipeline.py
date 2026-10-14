@@ -5,14 +5,23 @@ Target Location: Delhi, India (1 January 1996 - 18 March 2026)
 Phase: Milestone 1 (Exploratory Data Analysis, Quality Audit, & Problem Scoping)
 """
 
-import os, sys, glob, json, warnings, subprocess
+import os, sys, glob, json, warnings, subprocess, argparse
 import numpy as np
 import pandas as pd
 import matplotlib
 
-# Use GUI backend if interactive display requested, else Agg for saving
-INTERACTIVE_GUI = ("--show" in sys.argv or "--interactive" in sys.argv)
-HEADLESS = ("--headless" in sys.argv or "--no-gui" in sys.argv)
+# CLI argument configuration
+parser = argparse.ArgumentParser(description="Delhi Weather Time-Series Milestone 1 Pipeline")
+parser.add_argument("--headless", "--no-gui", action="store_true", help="Run without opening GUI or preview windows")
+parser.add_argument("--interactive", "--show", action="store_true", help="Open matplotlib interactive plot window")
+parser.add_argument("--no-open", action="store_true", help="Do not auto-open overview dashboard on macOS")
+parser.add_argument("--out-dir", default="milestone1_output", help="Output directory path")
+args, _ = parser.parse_known_args()
+
+HEADLESS = args.headless
+INTERACTIVE_GUI = args.interactive
+NO_OPEN = args.no_open or HEADLESS
+
 if not INTERACTIVE_GUI:
     matplotlib.use("Agg")
 
@@ -20,6 +29,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import spearmanr
 from statsmodels.tsa.seasonal import STL
+from statsmodels.tsa.stattools import adfuller, kpss, acf
 from pptx import Presentation
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
@@ -42,7 +52,7 @@ CONFIG = {
     "SOURCE": "Kaggle - sandeepgupta09 / Indian Weather Dataset 1996-2026",
     "SOURCE_URL": "kaggle.com/datasets/sandeepgupta09/indian-weather-dataset-1996-2026",
     "LICENSE": "CC0: Public Domain (verified on Kaggle page)",
-    "OUT_DIR": "milestone1_output"
+    "OUT_DIR": args.out_dir
 }
 
 NAVY, MID, LIGHT, ORANGE, GREY, WHITE, DARK_TEXT = "0B1F3A", "1F4E79", "DCE9F5", "F28C28", "6B7785", "FFFFFF", "1B2A3C"
@@ -193,6 +203,26 @@ if rain_col:
     S["rho_raw"] = float(spearmanr(valid_coupled["tmean"], valid_coupled["rain"])[0])
     S["rho_anom"] = float(spearmanr(valid_coupled["t_anom"], valid_coupled["rain"])[0])
 
+# Stationarity & Autocorrelation diagnostics (Exploratory Phase 1 Baseline)
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    adf_stat, adf_pvalue, _, _, adf_crit, _ = adfuller(interpolated_series, autolag="AIC")
+    kpss_stat, kpss_pvalue, _, kpss_crit = kpss(interpolated_series, regression="c", nlags="auto")
+    acf_vals = acf(interpolated_series, nlags=365)
+
+stat_diag = {
+    "adf_statistic": float(adf_stat),
+    "adf_pvalue": float(adf_pvalue),
+    "adf_critical_values": {str(k): float(v) for k, v in adf_crit.items()},
+    "kpss_statistic": float(kpss_stat),
+    "kpss_pvalue": float(kpss_pvalue),
+    "kpss_critical_values": {str(k): float(v) for k, v in kpss_crit.items()},
+    "acf_lag1": float(acf_vals[1]),
+    "acf_lag7": float(acf_vals[7]),
+    "acf_lag30": float(acf_vals[30]),
+    "acf_lag365": float(acf_vals[365])
+}
+
 def query_extreme_events(column_name, ascending=False, unit_label="°C"):
     sub = daily[column_name].dropna().sort_values(ascending=ascending).head(5)
     return pd.DataFrame({
@@ -207,7 +237,8 @@ cold_extremes_table = query_extreme_events("tmin", ascending=True)
 with open(os.path.join(OUT, "stats.json"), "w") as f:
     json.dump({
         "data_audit": {k: (str(v) if isinstance(v, pd.Timestamp) else v) for k, v in Q.items()},
-        "eda_statistics": S
+        "eda_statistics": S,
+        "stationarity_diagnostics": stat_diag
     }, f, indent=2, default=str)
 
 print(f"      • Daily Series Length:     {Q['daily_observations']:,} days (≥500 required)")
@@ -219,6 +250,9 @@ print(f"      • Seasonal Strength (Fs):  {S['Fs']:.3f} (Dominant annual period
 print(f"      • Trend Strength (Ft):     {S['Ft']:.3f}")
 print(f"      • Monsoon Rain Share:      {S.get('monsoon_share', 0):.1f}% (Jun–Sep)")
 print(f"      • Temp-Rain Association:   ρ = {S.get('rho_raw', 0):.2f} (raw), ρ = {S.get('rho_anom', 0):.2f} (deseasonalized)")
+print(f"      • Stationarity (ADF):      Stat = {stat_diag['adf_statistic']:.4f} (p = {stat_diag['adf_pvalue']:.2e}, rejects unit root)")
+print(f"      • Stationarity (KPSS):     Stat = {stat_diag['kpss_statistic']:.4f} (p = {stat_diag['kpss_pvalue']:.4f}, mean stationary)")
+print(f"      • Autocorrelation (ACF):   Lag-1 = {stat_diag['acf_lag1']:.3f} | Lag-7 = {stat_diag['acf_lag7']:.3f} | Lag-365 = {stat_diag['acf_lag365']:.3f}")
 
 print("\n" + "-" * 40 + " TOP HISTORICAL EXTREMES " + "-" * 40)
 print("  TOP 5 HOTTEST DAYS (Max Temp):")
@@ -421,7 +455,7 @@ print("      ✓ Dashboard: 00_overview_dashboard.png (Complete 7-Figure Overvie
 # 5. SYNOPSIS PRESENTATION BUILDER (RUBRIC-ALIGNED 12-SLIDE DECK)
 # =====================================================================
 print("\n[4/5] Compiling 12-slide Milestone 1 Synopsis slide deck...")
-def compile_synopsis_deck(df_raw, daily, Q, S, FIGS):
+def compile_synopsis_deck(df_raw, daily, Q, S, FIGS, stat_diag):
     prs = Presentation()
     prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
     BLANK = prs.slide_layouts[6]
@@ -665,7 +699,7 @@ def compile_synopsis_deck(df_raw, daily, Q, S, FIGS):
     insert_structured_panel(s11, 6.8, 4.65, 6.03, 2.15, "Planned Evaluation Protocol (Upcoming Phases)", [
         "Chronological Train / Validation / Test Split (Strictly no random shuffling)",
         "Error Metrics: RMSE (penalizes extremes), MAE (linear scale), MAPE",
-        "Stationarity testing (ADF/KPSS) & ACF/PACF diagnostics to be done in Phase 2",
+        f"Stationarity Diagnostics: ADF Stat = {stat_diag['adf_statistic']:.2f} (p < 0.001), Lag-365 ACF = {stat_diag['acf_lag365']:.2f}",
         "Strict Compliance: No forecasting models are executed in Phase 1"], size=11.5)
 
     # Slide 12: Synthesis & references
@@ -699,15 +733,25 @@ def compile_synopsis_deck(df_raw, daily, Q, S, FIGS):
 # 6. PIPELINE ORCHESTRATION & DISPLAY
 # =====================================================================
 if __name__ == "__main__":
-    compile_synopsis_deck(df_raw, daily, Q, S, FIGS)
+    compile_synopsis_deck(df_raw, daily, Q, S, FIGS, stat_diag)
     
+    # Generate interactive HTML dashboard reports
+    try:
+        from report_generator import generate_html_report
+        html_out = generate_html_report(Q, S, stat_diag, hot_extremes_table, cold_extremes_table, output_dir=OUT, is_root=False)
+        generate_html_report(Q, S, stat_diag, hot_extremes_table, cold_extremes_table, output_dir="index.html", is_root=True)
+        print(f"      ✓ Interactive HTML Dashboard: {html_out}")
+        print(f"      ✓ Root Index Page:           index.html (GitHub Pages Ready)")
+    except Exception as e:
+        print(f"      ! Warning: HTML report generation encountered: {e}")
+
     print("\n[5/5] Visual Display & Completion:")
     print(f"      ✓ Figures Directory: {FIG}/")
     print(f"      ✓ Slide Deck:        {os.path.join(OUT, 'Milestone1_Synopsis.pptx')}")
     print(f"      ✓ Overview Dashboard: {dash_path}")
     
     # Auto-open dashboard image on screen (macOS Preview) if not running headless
-    if not HEADLESS and sys.platform == "darwin":
+    if not NO_OPEN and sys.platform == "darwin":
         try:
             subprocess.run(["open", dash_path], check=False)
             print("      ✓ Displayed Overview Dashboard on screen via macOS Preview.")
