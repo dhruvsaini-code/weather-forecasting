@@ -46,7 +46,7 @@ CONFIG = {
     "CANDIDATES": ["delhi_weather_1996_2026.csv", "Indian_Weather_Dataset.csv"],
     "CITY": "delhi",
     "TITLE": "Exploratory Time-Series Analysis of Urban Weather Dynamics in Delhi (1996–2026)",
-    "TEAM": "Team Members (Roll Nos.)",
+    "TEAM": "Team Members: Dhruv Saini (S24CSEU0818) & Aarush Saxena (S24CSEU1682)",
     "GUIDE": "Course Instructor & Project Evaluator",
     "COURSE": "Time Series Analysis & Forecasting",
     "SOURCE": "Kaggle - sandeepgupta09 / Indian Weather Dataset 1996-2026",
@@ -729,13 +729,11 @@ def compile_synopsis_deck(df_raw, daily, Q, S, FIGS, stat_diag):
     prs.save(pptx_path)
     print(f"      ✓ Presentation compiled: {pptx_path} ({TOTAL_SLIDES} slides)")
 
-# =====================================================================
-# 6. PIPELINE ORCHESTRATION & DISPLAY
-# =====================================================================
+
 if __name__ == "__main__":
     compile_synopsis_deck(df_raw, daily, Q, S, FIGS, stat_diag)
     
-    # Generate interactive HTML dashboard reports
+    
     try:
         from report_generator import generate_html_report
         html_out = generate_html_report(Q, S, stat_diag, hot_extremes_table, cold_extremes_table, output_dir=OUT, is_root=False)

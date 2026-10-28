@@ -1,0 +1,292 @@
+{
+  "project_metadata": {
+    "title": "Classical Time-Series Forecasting of Delhi Urban Weather Dynamics (1996\u20132026)",
+    "phase": "Milestone 2: Mid-Semester Evaluation",
+    "evaluation_period": "19-Oct-2026 to 07-Nov-2026",
+    "total_days": 11035,
+    "train_days": 10670,
+    "test_days": 365,
+    "train_range": [
+      "1996-01-01",
+      "2025-03-18"
+    ],
+    "test_range": [
+      "2025-03-19",
+      "2026-03-18"
+    ]
+  },
+  "stationarity_diagnostics": {
+    "raw": {
+      "adf_stat": -10.462664743798875,
+      "adf_pvalue": 1.3464426250112598e-18,
+      "adf_usedlag": 39,
+      "adf_critical": {
+        "1%": -3.430965322654626,
+        "5%": -2.8618119377856095,
+        "10%": -2.566914747342626
+      },
+      "kpss_stat": 0.02318206650617728,
+      "kpss_pvalue": 0.1,
+      "kpss_critical": {
+        "10%": 0.347,
+        "5%": 0.463,
+        "2.5%": 0.574,
+        "1%": 0.739
+      },
+      "stationary_conclusion": "Rejects unit root (ADF p < 0.001); Level-stationary by KPSS (p >= 0.10)"
+    },
+    "first_diff": {
+      "adf_stat": -11.355933772783636,
+      "adf_pvalue": 9.734924090731912e-21,
+      "kpss_stat": 0.006797519703273054,
+      "kpss_pvalue": 0.1,
+      "stationary_conclusion": "Strongly stationary; mean 0, variance homoscedastic (d=1)"
+    },
+    "seasonal_diff_365": {
+      "adf_stat": -12.765155415625062,
+      "adf_pvalue": 7.986960229371303e-24,
+      "stationary_conclusion": "Strongly stationary after seasonal differencing (D=1, s=365)"
+    }
+  },
+  "model_specifications": {
+    "Naive (Persistence)": {
+      "type": "Baseline",
+      "params": {
+        "last_observation": 22.4
+      },
+      "justification": "Standard non-parametric persistence benchmark. Predicts last observed temperature forward."
+    },
+    "Seasonal Naive": {
+      "type": "Baseline",
+      "params": {
+        "seasonal_period": 365
+      },
+      "justification": "Accounts for Delhi's dominant annual solar cycle by repeating the prior year's daily trajectory."
+    },
+    "Holt Linear Trend": {
+      "type": "Exponential Smoothing",
+      "params": {
+        "alpha": 1.0,
+        "beta": 0.0,
+        "initial_level": 15.21,
+        "initial_trend": 0.0007
+      },
+      "aic": 926.6,
+      "bic": 955.7,
+      "justification": "Captures level and linear drift but explicitly lacks seasonal adjustment; proves necessity of seasonal modeling."
+    },
+    "Holt-Winters Additive": {
+      "type": "Exponential Smoothing",
+      "params": {
+        "alpha": 0.9554,
+        "beta": 0.0,
+        "gamma": 0.044633,
+        "seasonal_periods": 365
+      },
+      "aic": 2878.0,
+      "bic": 5562.6,
+      "justification": "Models level, linear trend, and 365 seasonal indices simultaneously. Additive structure matches stable annual temperature swing."
+    },
+    "Holt-Winters Damped": {
+      "type": "Exponential Smoothing",
+      "params": {
+        "alpha": 0.9554,
+        "beta": 0.0,
+        "gamma": 0.044633,
+        "phi": 0.9891,
+        "seasonal_periods": 365
+      },
+      "aic": 2880.0,
+      "bic": 5571.8,
+      "justification": "Damps trend parameter with decay factor phi. Prevents unrealistic linear runaway temperatures over extended horizons."
+    },
+    "ARIMA(2,1,2)": {
+      "type": "ARIMA",
+      "order": [
+        2,
+        1,
+        2
+      ],
+      "aic": 30241.3,
+      "bic": 30277.7,
+      "params": {
+        "ar.L1": 0.858,
+        "ar.L2": -0.2356,
+        "ma.L1": -0.6533,
+        "ma.L2": -0.0634,
+        "sigma2": 0.9957
+      },
+      "justification": "Non-seasonal ARIMA order selected via PACF cutoff at lag 2 and differencing d=1. Demonstrates reversion to drift when seasonal terms are absent."
+    },
+    "SARIMAX (Fourier K=3, ARIMA(2,0,1))": {
+      "type": "Seasonal Dynamic Harmonic Regression",
+      "order": [
+        2,
+        0,
+        1
+      ],
+      "fourier_harmonics": 3,
+      "fourier_terms": 6,
+      "aic": 29509.8,
+      "bic": 29589.8,
+      "params": {
+        "intercept": 4.2882,
+        "sin_1": -0.3987,
+        "cos_1": -9.1335,
+        "sin_2": -2.1051,
+        "cos_2": -2.1662,
+        "sin_3": 0.3509,
+        "cos_3": -0.1175,
+        "ar.L1": 0.9102,
+        "ar.L2": -0.086,
+        "ma.L1": 0.2227,
+        "sigma2": 0.9399
+      },
+      "justification": "State-of-the-art classical representation for daily series with annual period s=365.25. Fourier series captures smooth deterministic solar insolation, while ARIMA(2,0,1) captures stochastic weather perturbations."
+    }
+  },
+  "comparative_metrics_daily_365": {
+    "Naive (Persistence)": {
+      "RMSE": 7.403,
+      "MAE": 6.648,
+      "MAPE": 29.81,
+      "R2": -0.1349,
+      "Max_Error": 15.15,
+      "Bias": 2.552
+    },
+    "Seasonal Naive": {
+      "RMSE": 2.909,
+      "MAE": 2.243,
+      "MAPE": 9.69,
+      "R2": 0.8247,
+      "Max_Error": 9.57,
+      "Bias": -0.172
+    },
+    "Holt Linear Trend": {
+      "RMSE": 7.412,
+      "MAE": 6.648,
+      "MAPE": 30.0,
+      "R2": -0.1377,
+      "Max_Error": 15.09,
+      "Bias": 2.429
+    },
+    "Holt-Winters Additive": {
+      "RMSE": 2.228,
+      "MAE": 1.73,
+      "MAPE": 7.37,
+      "R2": 0.8972,
+      "Max_Error": 7.55,
+      "Bias": 0.616
+    },
+    "Holt-Winters Damped": {
+      "RMSE": 2.129,
+      "MAE": 1.657,
+      "MAPE": 7.13,
+      "R2": 0.9061,
+      "Max_Error": 7.28,
+      "Bias": 0.362
+    },
+    "ARIMA(2,1,2)": {
+      "RMSE": 7.244,
+      "MAE": 6.47,
+      "MAPE": 29.69,
+      "R2": -0.0869,
+      "Max_Error": 14.64,
+      "Bias": 2.049
+    },
+    "SARIMAX (Fourier K=3, ARIMA(2,0,1))": {
+      "RMSE": 2.376,
+      "MAE": 1.879,
+      "MAPE": 8.03,
+      "R2": 0.8831,
+      "Max_Error": 6.63,
+      "Bias": 0.55
+    }
+  },
+  "monthly_sarima_metrics": {
+    "RMSE": 1.264,
+    "MAE": 0.939,
+    "MAPE": 3.99,
+    "R2": 0.9637,
+    "Max_Error": 2.78,
+    "Bias": 0.445
+  },
+  "best_model": {
+    "name": "Holt-Winters Damped",
+    "metrics": {
+      "RMSE": 2.129,
+      "MAE": 1.657,
+      "MAPE": 7.13,
+      "R2": 0.9061,
+      "Max_Error": 7.28,
+      "Bias": 0.362
+    },
+    "seasonal_breakdown": {
+      "Winter": {
+        "days": 90,
+        "actual_mean": 15.28,
+        "pred_mean": 14.97,
+        "RMSE": 1.782,
+        "MAE": 1.507,
+        "MAPE": 10.48
+      },
+      "Summer": {
+        "days": 92,
+        "actual_mean": 29.35,
+        "pred_mean": 29.17,
+        "RMSE": 2.499,
+        "MAE": 1.935,
+        "MAPE": 6.88
+      },
+      "Monsoon": {
+        "days": 122,
+        "actual_mean": 30.16,
+        "pred_mean": 29.8,
+        "RMSE": 2.251,
+        "MAE": 1.695,
+        "MAPE": 5.5
+      },
+      "Post-monsoon": {
+        "days": 61,
+        "actual_mean": 22.18,
+        "pred_mean": 21.46,
+        "RMSE": 1.699,
+        "MAE": 1.382,
+        "MAPE": 5.86
+      }
+    },
+    "extremes_breakdown": {
+      "heatwave_extreme": {
+        "criterion": "Daily Max Temp >= 38 \u00b0C (Peak Heatwave)",
+        "count_days": 45,
+        "mean_actual_tmean": 33.8,
+        "mean_pred_tmean": 32.83,
+        "RMSE": 2.147,
+        "MAE": 1.674
+      },
+      "coldsnap_extreme": {
+        "criterion": "Daily Min Temp <= 8 \u00b0C (Severe Winter Cold)",
+        "count_days": 20,
+        "mean_actual_tmean": 11.57,
+        "mean_pred_tmean": 13.26,
+        "RMSE": 2.261,
+        "MAE": 2.027
+      }
+    },
+    "residual_diagnostics": {
+      "model": "Holt-Winters Damped",
+      "mean": 0.3615,
+      "std": 2.0984,
+      "skewness": 0.1588,
+      "kurtosis": 0.3707,
+      "jarque_bera_stat": 3.6251,
+      "jarque_bera_pvalue": 0.16324,
+      "ljung_box_lag7_stat": 545.899,
+      "ljung_box_lag7_p": 0.0,
+      "ljung_box_lag14_stat": 580.259,
+      "ljung_box_lag14_p": 0.0,
+      "ljung_box_lag30_stat": 598.827,
+      "ljung_box_lag30_p": 0.0
+    }
+  }
+}
