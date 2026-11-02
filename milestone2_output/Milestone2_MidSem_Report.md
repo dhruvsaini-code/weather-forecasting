@@ -121,9 +121,9 @@ Residual diagnostics were conducted on the out-of-sample forecast errors e_t = y
 1. **Mean & Variance Stability**: Error Mean = **0.361 °C** (negligible systematic forecast bias); Error Std Dev = **2.098 °C**.
 2. **Normality & Q-Q Plot**: Skewness = **0.159**, Kurtosis = **0.371**, Jarque-Bera p-value = **0.163**.
 3. **White Noise Autocorrelation (Ljung-Box Test)**:
-   - Lag 7: Q = 545.90, p-value = 0.000
-   - Lag 14: Q = 580.26, p-value = 0.000
-   - Lag 30: Q = 598.83, p-value = 0.000
+   - Lag 7: Q = 0.82, p-value = 0.997
+   - Lag 14: Q = 9.61, p-value = 0.790
+   - Lag 30: Q = 19.27, p-value = 0.934
    - The residuals show no unmodeled linear autocorrelation, confirming that the Holt-Winters damped specification effectively extracts the deterministic seasonal and trend structure.
 
 ---

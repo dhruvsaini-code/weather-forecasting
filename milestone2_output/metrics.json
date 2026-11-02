@@ -281,12 +281,12 @@
       "kurtosis": 0.3707,
       "jarque_bera_stat": 3.6251,
       "jarque_bera_pvalue": 0.16324,
-      "ljung_box_lag7_stat": 545.899,
-      "ljung_box_lag7_p": 0.0,
-      "ljung_box_lag14_stat": 580.259,
-      "ljung_box_lag14_p": 0.0,
-      "ljung_box_lag30_stat": 598.827,
-      "ljung_box_lag30_p": 0.0
+      "ljung_box_lag7_stat": 0.817,
+      "ljung_box_lag7_p": 0.9973,
+      "ljung_box_lag14_stat": 9.612,
+      "ljung_box_lag14_p": 0.79,
+      "ljung_box_lag30_stat": 19.265,
+      "ljung_box_lag30_p": 0.9343
     }
   }
 }

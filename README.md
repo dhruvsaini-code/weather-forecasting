@@ -25,14 +25,14 @@ Evaluated strictly on an out-of-sample holdout of **365 continuous days (1 full 
 
 | Model Architecture | Model Family | RMSE (°C) | MAE (°C) | MAPE (%) | $R^2$ Score | Max Error (°C) | Operational Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Holt-Winters Damped** | Triple Exp. Smoothing | **2.129** | **1.657** | **7.13%** | **0.9061** | **6.18** | 🏆 **Champion Model** |
-| **Holt-Winters Additive** | Triple Exp. Smoothing | **2.228** | 1.730 | 7.37% | 0.8972 | 6.54 | Strong Baseline |
-| **SARIMAX (Fourier $K=3$)** | Dynamic Harmonic Reg. | **2.376** | 1.879 | 8.03% | 0.8831 | 6.42 | High Explainability |
-| **Seasonal Naive (365d)** | Non-parametric Baseline | **2.909** | 2.243 | 9.69% | 0.8247 | 7.82 | Annual Persistence |
-| **Classical ARIMA(2,1,2)** | Box-Jenkins ($d=1$) | **7.244** | 6.470 | 29.69% | -0.0869 | 11.23 | Non-Seasonal Drift |
-| **Naive (Persistence)** | Random Walk Baseline | **7.403** | 6.648 | 29.81% | -0.1349 | 11.39 | Memoryless Baseline |
-| **Holt Linear Trend** | Double Exp. Smoothing | **7.412** | 6.648 | 30.00% | -0.1377 | 11.41 | Linear Drift |
-| *Monthly SARIMA(1,1,1)x(1,1,1)₁₂* | *Monthly Aggregate* | *1.264* | *0.939* | *3.99%* | *0.9637* | *2.80* | *Monthly Benchmark* |
+| **Holt-Winters Damped** | Triple Exp. Smoothing | **2.129** | **1.657** | **7.13%** | **0.9061** | **7.28** | 🏆 **Champion Model** |
+| **Holt-Winters Additive** | Triple Exp. Smoothing | **2.228** | 1.730 | 7.37% | 0.8972 | 7.55 | Strong Baseline |
+| **SARIMAX (Fourier $K=3$)** | Dynamic Harmonic Reg. | **2.376** | 1.879 | 8.03% | 0.8831 | 6.63 | High Explainability |
+| **Seasonal Naive (365d)** | Non-parametric Baseline | **2.909** | 2.243 | 9.69% | 0.8247 | 9.57 | Annual Persistence |
+| **Classical ARIMA(2,1,2)** | Box-Jenkins ($d=1$) | **7.244** | 6.470 | 29.69% | -0.0869 | 14.64 | Non-Seasonal Drift |
+| **Naive (Persistence)** | Random Walk Baseline | **7.403** | 6.648 | 29.81% | -0.1349 | 15.15 | Memoryless Baseline |
+| **Holt Linear Trend** | Double Exp. Smoothing | **7.412** | 6.648 | 30.00% | -0.1377 | 15.09 | Linear Drift |
+| *Monthly SARIMA(1,1,1)x(1,1,1)₁₂* | *Monthly Aggregate* | *1.264* | *0.939* | *3.99%* | *0.9637* | *2.78* | *Monthly Benchmark* |
 
 ---
 
@@ -88,11 +88,11 @@ All diagnostic charts are compiled in `milestone2_output/figures/`:
 
 1. **Power Utilities & Peak Cooling Degree Days**:
    - Summer heatwave temperatures trigger massive residential air conditioning surges (>8,000 MW in Delhi).
-   - Holt-Winters Damped tracks summer temperature with **$\text{MAE} = 1.83^\circ\text{C}$**, allowing grid dispatchers to procure short-term power purchase agreements within safe 5% operational reserves.
+   - Holt-Winters Damped tracks summer temperature with **$\text{MAE} = 1.94^\circ\text{C}$** ($\text{RMSE} = 2.50^\circ\text{C}$), allowing grid dispatchers to procure short-term power purchase agreements within safe 5% operational reserves.
 2. **Public Health & Heatwave Advisories (May–June)**:
-   - On days with $T_{\max} \ge 38^\circ\text{C}$, the model achieves an **$\text{MAE} = 1.94^\circ\text{C}$**, enabling municipal disaster management agencies to issue heat action alerts 7–14 days in advance.
+   - On days with $T_{\max} \ge 38^\circ\text{C}$ ($N = 45$ days), the model achieves an **$\text{MAE} = 1.67^\circ\text{C}$** ($\text{RMSE} = 2.15^\circ\text{C}$), enabling municipal disaster management agencies to issue heat action alerts 7–14 days in advance.
 3. **Winter Cold Snap & Smog Trapping (December–January)**:
-   - On days with $T_{\min} \le 8^\circ\text{C}$, the model achieves an **$\text{MAE} = 1.68^\circ\text{C}$**, aiding in night shelter allocation and forecasting thermal inversion layers that trap hazardous particulate matter.
+   - On days with $T_{\min} \le 8^\circ\text{C}$ ($N = 20$ days), the model achieves an **$\text{MAE} = 2.03^\circ\text{C}$** ($\text{RMSE} = 2.26^\circ\text{C}$), aiding in night shelter allocation and forecasting thermal inversion layers that trap hazardous particulate matter.
 
 ---
 

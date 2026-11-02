@@ -221,944 +221,318 @@ def generate_m2_academic_report(metrics_data, output_dir="milestone2_output"):
 
 def generate_interactive_dashboard(metrics_data, output_filepath="index.html", is_milestone2_standalone=False):
     """
-    Generates a modern, responsive interactive web dashboard for Phase 2,
-    featuring tabs for Milestone 2 Classical Forecasting Hub, Milestone 1 EDA,
-    interactive forecast inspection, model benchmarking, and deliverables download.
+    Generates the editorial minimalist web frontend for Phase 2,
+    matching the Delhi Weather 1996-2026 design.
     """
-    m_meta = metrics_data.get("project_metadata", {})
     eval_tbl = metrics_data.get("comparative_metrics_daily_365", {})
     best = metrics_data.get("best_model", {})
-    best_m = best.get("metrics", {})
     season_perf = best.get("seasonal_breakdown", {})
-    extremes_perf = best.get("extremes_breakdown", {})
-    resid_diag = best.get("residual_diagnostics", {})
-    m_sarima = metrics_data.get("monthly_sarima_metrics", {})
-    stat = metrics_data.get("stationarity_diagnostics", {})
-    models_spec = metrics_data.get("model_specifications", {})
-    hw_d_params = models_spec.get("Holt-Winters Damped", {}).get("params", {})
 
+    out_prefix = "" if is_milestone2_standalone else "milestone2_output/"
     img_dir = "figures/" if is_milestone2_standalone else "milestone2_output/figures/"
-    m1_img_dir = "../milestone1_output/figures/" if is_milestone2_standalone else "milestone1_output/figures/"
 
-    # Model rows HTML
-    model_rows = []
-    for name, m in eval_tbl.items():
-        is_best = "Holt-Winters Damped" in name
-        row_cls = "highlight-row" if is_best else ""
-        badge = "<span class='badge badge-best'>Best Model</span>" if is_best else ""
-        model_rows.append(
-            f"<tr class='{row_cls}'>"
-            f"<td><strong>{name}</strong> {badge}</td>"
-            f"<td class='metric-val'>{m['RMSE']:.3f} °C</td>"
-            f"<td class='metric-val'>{m['MAE']:.3f} °C</td>"
-            f"<td class='metric-val'>{m['MAPE']:.2f}%</td>"
-            f"<td class='metric-val'>{m['R2']:.4f}</td>"
-            f"<td class='metric-val'>{m['Max_Error']:.2f} °C</td>"
-            f"</tr>"
-        )
-    # Monthly SARIMA row
-    model_rows.append(
-        f"<tr class='benchmark-row'>"
-        f"<td><em>Monthly SARIMA(1,1,1)x(1,1,1)₁₂ (Monthly Benchmark)</em></td>"
-        f"<td class='metric-val'>{m_sarima.get('RMSE', 1.264):.3f} °C</td>"
-        f"<td class='metric-val'>{m_sarima.get('MAE', 0.939):.3f} °C</td>"
-        f"<td class='metric-val'>{m_sarima.get('MAPE', 3.99):.2f}%</td>"
-        f"<td class='metric-val'>{m_sarima.get('R2', 0.9637):.4f}</td>"
-        f"<td class='metric-val'>{m_sarima.get('Max_Error', 2.80):.2f} °C</td>"
-        f"</tr>"
-    )
-    models_table_html = "\n".join(model_rows)
+    hw_d = eval_tbl.get("Holt-Winters Damped", {"RMSE": 2.129, "R2": 0.9061})
+    hw_a = eval_tbl.get("Holt-Winters Additive", {"RMSE": 2.228, "R2": 0.8972})
+    sarimax = eval_tbl.get("SARIMAX (Fourier K=3, ARIMA(2,0,1))", {"RMSE": 2.376, "R2": 0.8831})
+    s_naive = eval_tbl.get("Seasonal Naive", {"RMSE": 2.909, "R2": 0.8247})
+    arima = eval_tbl.get("ARIMA(2,1,2)", {"RMSE": 7.244, "R2": -0.0869})
+    naive = eval_tbl.get("Naive (Persistence)", {"RMSE": 7.403, "R2": -0.1349})
+    holt = eval_tbl.get("Holt Linear Trend", {"RMSE": 7.412, "R2": -0.1377})
 
-    # Seasonal rows HTML
-    season_rows = []
-    for s_name, sp in season_perf.items():
-        season_rows.append(
-            f"<tr>"
-            f"<td><strong>{s_name}</strong></td>"
-            f"<td>{sp['days']} Days</td>"
-            f"<td>{sp['actual_mean']:.2f} °C</td>"
-            f"<td>{sp['pred_mean']:.2f} °C</td>"
-            f"<td class='metric-val text-accent'>{sp['RMSE']:.3f} °C</td>"
-            f"<td class='metric-val'>{sp['MAE']:.3f} °C</td>"
-            f"<td class='metric-val'>{sp['MAPE']:.2f}%</td>"
-            f"</tr>"
-        )
-    seasons_table_html = "\n".join(season_rows)
+    w_sp = season_perf.get("Winter", {"RMSE": 1.782, "days": 90, "actual_mean": 15.28, "pred_mean": 14.97})
+    s_sp = season_perf.get("Summer", {"RMSE": 2.499, "days": 92, "actual_mean": 29.35, "pred_mean": 29.17})
+    m_sp = season_perf.get("Monsoon", {"RMSE": 2.251, "days": 122, "actual_mean": 30.16, "pred_mean": 29.80})
+    p_sp = season_perf.get("Post-monsoon", {"RMSE": 1.699, "days": 61, "actual_mean": 22.18, "pred_mean": 21.46})
+
+    def fmt_r2(val):
+        s = f"{val:.4f}"
+        return s.replace("0.", ".").replace("-0.", "-.")
 
     html = f"""<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delhi Urban Weather Dynamics | Phase 2 Mid-Semester Forecasting Hub</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <style>
-    :root {{
-      --bg-primary: #080E18;
-      --bg-secondary: #0F1B2D;
-      --bg-card: #142238;
-      --bg-card-hover: #192B45;
-      --border-color: #223755;
-      --border-accent: #38BDF8;
-      --text-primary: #F1F5F9;
-      --text-secondary: #94A3B8;
-      --text-muted: #64748B;
-      --accent-cyan: #38BDF8;
-      --accent-blue: #0284C7;
-      --accent-orange: #F97316;
-      --accent-amber: #F59E0B;
-      --accent-emerald: #10B981;
-      --accent-rose: #F43F5E;
-      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-      --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
-      --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 18px;
-      --font-main: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-    }}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delhi Weather, 1996–2026 | Time-Series Forecasting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{{
+  --plaster:#E8EAE3; --paper:#F3F4EF; --ink:#1B2320; --soft:#5C665F;
+  --olive:#55663A; --navy:#22344D; --ochre:#C18A2C; --line:#C9CEC3;
+  --serif:'Instrument Serif',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif;
+}}
+@media (prefers-color-scheme:dark){{
+  :root{{--plaster:#161C19;--paper:#1D2521;--ink:#E8EAE3;--soft:#9BA59D;--line:#2E3832;--olive:#9DB26F;--navy:#8FA9CC;--ochre:#E0AE4F}}
+}}
+*{{box-sizing:border-box;margin:0;padding:0}}
+html{{scroll-behavior:smooth}}
+body{{font-family:var(--sans);background:var(--plaster);color:var(--ink);line-height:1.65;font-size:1rem}}
+a{{color:inherit}}
+:focus-visible{{outline:2px solid var(--ochre);outline-offset:3px}}
+.wrap{{max-width:1240px;margin:0 auto;padding:0 clamp(20px,4vw,48px)}}
 
-    [data-theme="light"] {{
-      --bg-primary: #F8FAFC;
-      --bg-secondary: #FFFFFF;
-      --bg-card: #F1F5F9;
-      --bg-card-hover: #E2E8F0;
-      --border-color: #CBD5E1;
-      --border-accent: #0284C7;
-      --text-primary: #0F172A;
-      --text-secondary: #475569;
-      --text-muted: #64748B;
-      --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
-      --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
-      --shadow-lg: 0 16px 40px rgba(0,0,0,0.12);
-    }}
+/* nav */
+nav{{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--plaster) 88%,transparent);backdrop-filter:blur(10px)}}
+nav .wrap{{display:flex;justify-content:space-between;align-items:center;height:64px}}
+nav .mark{{font-family:var(--serif);font-size:1.5rem;text-decoration:none}}
+nav ul{{display:flex;gap:clamp(14px,3vw,36px);list-style:none;align-items:center}}
+nav ul a{{text-decoration:none;font-size:.95rem;color:var(--soft)}}
+nav ul a:hover{{color:var(--ink)}}
+.pill{{background:var(--ink);color:var(--plaster)!important;padding:8px 18px;border-radius:99px}}
 
-    * {{
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
-    }}
+/* hero */
+.hero{{padding:clamp(40px,8vw,96px) 0 clamp(32px,5vw,64px)}}
+.wordmark{{font-family:var(--serif);font-weight:400;font-size:clamp(4.5rem,21vw,17rem);line-height:.82;letter-spacing:-.03em;display:flex;flex-wrap:wrap;overflow:hidden}}
+.wordmark span{{display:inline-block;transform:translateY(105%);animation:rise 1s cubic-bezier(.2,.8,.2,1) forwards}}
+.wordmark span:nth-child(2){{animation-delay:.07s}}.wordmark span:nth-child(3){{animation-delay:.14s}}
+.wordmark span:nth-child(4){{animation-delay:.21s}}.wordmark span:nth-child(5){{animation-delay:.28s}}
+@keyframes rise{{to{{transform:none}}}}
+.hero-row{{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,5vw,80px);margin-top:clamp(28px,4vw,56px);align-items:end}}
+.hero-row p{{font-family:var(--serif);font-size:clamp(1.5rem,2.6vw,2.4rem);line-height:1.2;max-width:22ch}}
+.hero-row small{{color:var(--soft);font-size:.95rem;max-width:42ch;justify-self:end}}
+.hero-img{{margin-top:clamp(28px,4vw,56px);border-radius:6px;overflow:hidden;background:#fff;position:relative}}
+.hero-img img{{width:100%;display:block;cursor:zoom-in}}
+.tag{{position:absolute;left:16px;bottom:16px;background:var(--plaster);color:var(--ink);padding:6px 14px;border-radius:99px;font-size:.85rem}}
 
-    body {{
-      font-family: var(--font-main);
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }}
+/* sections */
+section{{padding:clamp(56px,9vw,120px) 0;border-top:1px solid var(--line)}}
+h2{{font-family:var(--serif);font-weight:400;font-size:clamp(2.4rem,6vw,5rem);line-height:1;letter-spacing:-.02em}}
+.head{{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:clamp(28px,5vw,64px)}}
+.head p{{color:var(--soft);max-width:44ch}}
 
-    .container {{
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 24px;
-      width: 100%;
-    }}
+/* models list */
+.models{{display:grid;gap:0}}
+.model{{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,3fr) 90px 80px;gap:20px;align-items:center;padding:22px 0;border-bottom:1px solid var(--line)}}
+.model:first-child{{border-top:1px solid var(--line)}}
+.model h3{{font-family:var(--serif);font-weight:400;font-size:1.7rem;line-height:1.1}}
+.model h3 em{{display:block;font-family:var(--sans);font-style:normal;font-size:.85rem;color:var(--soft);margin-top:4px}}
+.bar{{height:10px;background:var(--line);border-radius:99px;overflow:hidden}}
+.bar i{{display:block;height:100%;background:var(--navy);border-radius:99px}}
+.model.best .bar i{{background:var(--olive)}}
+.model.best h3::after{{content:"Champion";font-family:var(--sans);font-size:.75rem;background:var(--olive);color:var(--paper);padding:3px 10px;border-radius:99px;margin-left:12px;vertical-align:middle}}
+.num{{font-variant-numeric:tabular-nums;text-align:right;font-size:1.05rem}}
+.num small{{display:block;color:var(--soft);font-size:.78rem}}
 
-    header {{
-      background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(15, 27, 45, 0.85) 100%);
-      border-bottom: 1px solid var(--border-color);
-      padding: 24px 0 18px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(12px);
-    }}
+/* philosophy */
+.pillars{{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,64px)}}
+.pillars h3{{font-family:var(--serif);font-weight:400;font-size:2rem;margin:10px 0}}
+.pillars .n{{color:var(--ochre);font-family:var(--serif);font-size:1.4rem}}
+.pillars p{{color:var(--soft)}}
 
-    .header-content {{
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }}
+/* seasons */
+.seasons{{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,2vw,24px)}}
+.season{{background:var(--paper);border-radius:6px;padding:28px 24px}}
+.season h3{{font-family:var(--serif);font-weight:400;font-size:1.8rem}}
+.season .big{{font-family:var(--serif);font-size:3.4rem;line-height:1;margin:18px 0 4px}}
+.season p{{color:var(--soft);font-size:.9rem}}
+.season.w{{border-bottom:5px solid var(--navy)}}.season.s{{border-bottom:5px solid var(--ochre)}}
+.season.m{{border-bottom:5px solid var(--olive)}}.season.p{{border-bottom:5px solid var(--soft)}}
 
-    .header-title h1 {{
-      font-size: 1.6rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #FFFFFF 0%, var(--accent-cyan) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.02em;
-    }}
+/* gallery */
+.gallery{{display:grid;grid-template-columns:repeat(12,1fr);gap:clamp(12px,2vw,24px)}}
+.fig{{grid-column:span 6;cursor:zoom-in;background:none;border:0;text-align:left;color:inherit;font:inherit}}
+.fig.wide{{grid-column:span 12}}
+.fig .img{{background:#fff;border-radius:6px;overflow:hidden}}
+.fig img{{width:100%;display:block;transition:transform .5s}}
+.fig:hover img{{transform:scale(1.025)}}
+.fig b{{display:block;font-family:var(--serif);font-weight:400;font-size:1.5rem;margin-top:14px;line-height:1.15}}
+.fig span{{color:var(--soft);font-size:.9rem;display:block;max-width:60ch}}
 
-    [data-theme="light"] .header-title h1 {{
-      background: linear-gradient(135deg, #0B1F3A 0%, #0284C7 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }}
+/* uses */
+.uses{{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,64px)}}
+.uses h3{{font-family:var(--serif);font-weight:400;font-size:1.9rem;margin-bottom:8px}}
+.uses p{{color:var(--soft)}}
 
-    .header-subtitle {{
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-top: 4px;
-    }}
+/* footer */
+footer{{background:var(--ink);color:var(--plaster);padding:clamp(48px,7vw,96px) 0 32px}}
+@media (prefers-color-scheme:dark){{footer{{background:var(--paper)}}}}
+footer .grid{{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px}}
+footer h4{{font-family:var(--serif);font-weight:400;font-size:2.6rem;line-height:1;max-width:14ch}}
+footer small{{opacity:.6;display:block;margin-bottom:10px}}
+footer a{{display:block;text-decoration:none;margin-bottom:6px}}
+footer a:hover{{text-decoration:underline}}
+.fine{{margin-top:56px;opacity:.55;font-size:.85rem}}
 
-    .phase-badge {{
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: rgba(249, 115, 22, 0.2);
-      color: var(--accent-orange);
-      border: 1px solid rgba(249, 115, 22, 0.4);
-    }}
+/* lightbox */
+dialog{{border:0;background:transparent;max-width:min(96vw,1400px);margin:auto}}
+dialog::backdrop{{background:rgba(10,14,12,.88)}}
+dialog img{{width:100%;max-height:82vh;object-fit:contain;background:#fff;border-radius:6px;display:block}}
+dialog p{{color:#E8EAE3;padding:14px 4px 0;font-size:.95rem}}
 
-    .header-actions {{
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }}
-
-    .theme-toggle, .btn-action {{
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-primary);
-      padding: 8px 14px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.85rem;
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-    }}
-
-    .theme-toggle:hover, .btn-action:hover {{
-      background: var(--bg-card-hover);
-      border-color: var(--border-accent);
-      transform: translateY(-1px);
-    }}
-
-    .btn-action.btn-primary {{
-      background: var(--accent-blue);
-      border-color: var(--accent-cyan);
-      color: #FFFFFF;
-    }}
-
-    /* Nav Tabs */
-    .nav-tabs {{
-      display: flex;
-      gap: 8px;
-      border-bottom: 1px solid var(--border-color);
-      margin: 24px 0;
-      overflow-x: auto;
-    }}
-
-    .nav-tab {{
-      padding: 12px 20px;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-family: inherit;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      white-space: nowrap;
-    }}
-
-    .nav-tab.active {{
-      color: var(--accent-cyan);
-      border-bottom-color: var(--accent-cyan);
-    }}
-
-    .tab-pane {{
-      display: none;
-    }}
-
-    .tab-pane.active {{
-      display: block;
-    }}
-
-    /* Stat Cards Grid */
-    .stats-grid {{
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }}
-
-    .stat-card {{
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      box-shadow: var(--shadow-sm);
-      position: relative;
-      overflow: hidden;
-    }}
-
-    .stat-card::before {{
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--border-color);
-    }}
-
-    .stat-card.card-orange::before {{ background: var(--accent-orange); }}
-    .stat-card.card-blue::before {{ background: var(--accent-cyan); }}
-    .stat-card.card-emerald::before {{ background: var(--accent-emerald); }}
-    .stat-card.card-purple::before {{ background: #A855F7; }}
-
-    .stat-value {{
-      font-size: 1.85rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-top: 6px;
-      font-family: var(--font-mono);
-    }}
-
-    .stat-label {{
-      font-size: 0.8rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }}
-
-    .stat-subtext {{
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }}
-
-    /* Section Cards */
-    .section-card {{
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      margin-bottom: 28px;
-      box-shadow: var(--shadow-md);
-    }}
-
-    .section-header {{
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }}
-
-    .section-title {{
-      font-size: 1.25rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }}
-
-    /* Tables */
-    .table-container {{
-      overflow-x: auto;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border-color);
-    }}
-
-    table {{
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-      text-align: left;
-    }}
-
-    th {{
-      background: var(--bg-secondary);
-      padding: 12px 16px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--border-color);
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-    }}
-
-    td {{
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border-color);
-    }}
-
-    tr:last-child td {{
-      border-bottom: none;
-    }}
-
-    tr:hover td {{
-      background: var(--bg-card-hover);
-    }}
-
-    tr.highlight-row td {{
-      background: rgba(16, 185, 129, 0.08);
-      font-weight: 600;
-    }}
-
-    tr.benchmark-row td {{
-      background: rgba(2, 132, 199, 0.08);
-    }}
-
-    .metric-val {{
-      font-family: var(--font-mono);
-      font-weight: 600;
-    }}
-
-    .badge {{
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }}
-
-    .badge-best {{
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--accent-emerald);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-    }}
-
-    /* Gallery Grid */
-    .gallery-grid {{
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 20px;
-    }}
-
-    .figure-card {{
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-    }}
-
-    .figure-card:hover {{
-      border-color: var(--border-accent);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
-    }}
-
-    .figure-card img {{
-      width: 100%;
-      height: auto;
-      display: block;
-      background: #FFFFFF;
-    }}
-
-    .figure-body {{
-      padding: 16px;
-    }}
-
-    .figure-title {{
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: var(--accent-cyan);
-    }}
-
-    .figure-desc {{
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }}
-
-    /* Lightbox Modal */
-    .lightbox {{
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(8px);
-      justify-content: center;
-      align-items: center;
-      padding: 24px;
-    }}
-
-    .lightbox.active {{
-      display: flex;
-    }}
-
-    .lightbox-content {{
-      max-width: 95%;
-      max-height: 90%;
-      position: relative;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }}
-
-    .lightbox-content img {{
-      max-width: 100%;
-      max-height: 75vh;
-      object-fit: contain;
-      background: #FFFFFF;
-    }}
-
-    .lightbox-caption {{
-      padding: 16px 20px;
-      font-size: 0.9rem;
-      color: var(--text-primary);
-    }}
-
-    .lightbox-close {{
-      position: absolute;
-      top: 12px;
-      right: 16px;
-      font-size: 1.8rem;
-      color: #FFFFFF;
-      cursor: pointer;
-      line-height: 1;
-      z-index: 10;
-    }}
-
-    /* Domain Cards */
-    .domain-grid {{
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-    }}
-
-    .domain-card {{
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 20px;
-    }}
-
-    .domain-title {{
-      font-size: 1rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }}
-
-    .text-orange {{ color: var(--accent-orange); }}
-    .text-blue {{ color: var(--accent-cyan); }}
-    .text-emerald {{ color: var(--accent-emerald); }}
-    .text-accent {{ color: var(--accent-cyan); }}
-
-    footer {{
-      margin-top: auto;
-      background: var(--bg-secondary);
-      border-top: 1px solid var(--border-color);
-      padding: 24px 0;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      text-align: center;
-    }}
-  </style>
+@media (max-width:860px){{
+  nav ul li:not(:last-child){{display:none}}
+  .hero-row,.pillars,.uses,footer .grid{{grid-template-columns:1fr}}
+  .hero-row small{{justify-self:start}}
+  .seasons{{grid-template-columns:1fr 1fr}}
+  .fig{{grid-column:span 12}}
+  .model{{grid-template-columns:1fr 70px 70px}}
+  .model .bar{{grid-column:1/-1;order:3}}
+}}
+@media (prefers-reduced-motion:reduce){{
+  html{{scroll-behavior:auto}}
+  .wordmark span{{animation:none;transform:none}}
+  .fig img{{transition:none}}
+}}
+</style>
 </head>
 <body>
 
-  <header>
-    <div class="container header-content">
-      <div class="header-title">
-        <h1>🌤️ Delhi Urban Weather Dynamics (1996–2026)</h1>
-        <div class="header-subtitle">
-          <span class="phase-badge">Phase 2: Mid-Semester Evaluation</span>
-          <span>•</span>
-          <span>Team: <strong>Dhruv Saini (S24CSEU0818)</strong> &amp; <strong>Aarush Saxena (S24CSEU1682)</strong></span>
-          <span>•</span>
-          <span>365-Day Test Holdout</span>
-          <span>•</span>
-          <span>Evaluation: 19-Oct to 07-Nov-2026</span>
-        </div>
-      </div>
-      <div class="header-actions">
-        <a href="milestone2_output/Milestone2_MidSem_Presentation.pptx" download class="btn-action btn-primary" id="download-deck-btn">
-          <span>📑</span> Download 12-Slide PPTX
-        </a>
-        <a href="milestone2_output/Milestone2_MidSem_Report.md" target="_blank" class="btn-action">
-          <span>📝</span> Academic Report
-        </a>
-        <a href="milestone2_output/forecast_comparison.csv" download class="btn-action">
-          <span>📈</span> Test CSV
-        </a>
-        <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme">
-          <span id="theme-icon">☀️</span>
-        </button>
-      </div>
+<nav>
+  <div class="wrap">
+    <a class="mark" href="#top">Delhi Weather</a>
+    <ul>
+      <li><a href="#models">Models</a></li>
+      <li><a href="#seasons">Seasons</a></li>
+      <li><a href="#figures">Figures</a></li>
+      <li><a class="pill" href="{out_prefix}Milestone2_MidSem_Presentation.pptx" download>Download deck</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main id="top">
+<header class="hero wrap">
+  <h1 class="wordmark" aria-label="Delhi"><span>D</span><span>E</span><span>L</span><span>H</span><span>I</span></h1>
+  <div class="hero-row">
+    <p>Thirty years of daily temperature, forecast a full year ahead to within 2.1 °C.</p>
+    <small>A time-series study of Delhi's weather from 1 January 1996 to 18 March 2026. Forecasts are tested on 365 unseen days, 19 March 2025 to 18 March 2026.</small>
+  </div>
+  <div class="hero-img">
+    <img src="{img_dir}00_milestone2_summary_dashboard.png" alt="Summary dashboard: forecasts against actual temperature, model errors and seasonal breakdown" loading="eager" data-zoom="Summary dashboard: 365-day forecasts against actual temperature, model error ranking, residuals and seasonal breakdown.">
+    <span class="tag">Phase 2 summary</span>
+  </div>
+</header>
+
+<section id="models">
+  <div class="wrap">
+    <div class="head">
+      <h2>Seven models</h2>
+      <p>Average error (RMSE, °C) over the 365 test days. Shorter bar means a better forecast.</p>
     </div>
-  </header>
+    <div class="models" id="modelList"></div>
+  </div>
+</section>
 
-  <main class="container" style="flex: 1; padding-top: 24px; padding-bottom: 40px;">
-
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-      <button class="nav-tab active" data-tab="tab-m2-hub">🚀 Phase 2 Forecasting Hub</button>
-      <button class="nav-tab" data-tab="tab-model-comparison">📊 Model Benchmark & Metrics</button>
-      <button class="nav-tab" data-tab="tab-diagnostics">🔍 Residuals & Diagnostics</button>
-      <button class="nav-tab" data-tab="tab-domain">🌍 Climatological Domain Impact</button>
-      <button class="nav-tab" data-tab="tab-m1-recap">📁 Phase 1 EDA & Quality Audit</button>
-    </div>
-
-    <!-- TAB 1: Phase 2 Forecasting Hub -->
-    <div class="tab-pane active" id="tab-m2-hub">
-      
-      <!-- Key Metric Cards -->
-      <div class="stats-grid">
-        <div class="stat-card card-emerald">
-          <div class="stat-label">Champion Classical Model</div>
-          <div class="stat-value text-emerald" style="font-size: 1.35rem;">HW Damped</div>
-          <div class="stat-subtext">Triple Exp Smoothing (ϕ = {hw_d_params.get('phi', 0.98)})</div>
-        </div>
-        <div class="stat-card card-orange">
-          <div class="stat-label">Best Test Holdout RMSE</div>
-          <div class="stat-value text-orange">{best_m.get('RMSE', 2.129):.3f} °C</div>
-          <div class="stat-subtext">26.8% better than Seasonal Naive</div>
-        </div>
-        <div class="stat-card card-blue">
-          <div class="stat-label">Mean Absolute Error (MAE)</div>
-          <div class="stat-value text-blue">{best_m.get('MAE', 1.657):.3f} °C</div>
-          <div class="stat-subtext">Mean Absolute % Err: {best_m.get('MAPE', 7.13):.2f}%</div>
-        </div>
-        <div class="stat-card card-purple">
-          <div class="stat-label">Explained Variance (R²)</div>
-          <div class="stat-value" style="color: #A855F7;">{best_m.get('R2', 0.9061)*100:.1f}%</div>
-          <div class="stat-subtext">R² = {best_m.get('R2', 0.9061):.4f} across 365 days</div>
-        </div>
-      </div>
-
-      <!-- Executive Overview Banner Figure -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-title">
-            <span>🌟</span> Executive Overview Dashboard (Phase 2 Multi-Panel Visual)
-          </div>
-          <span class="badge badge-best">Publication Grade (200 DPI)</span>
-        </div>
-        <div class="figure-card" onclick="openLightbox('{img_dir}00_milestone2_summary_dashboard.png', 'Phase 2 Executive Summary Dashboard: 365-day test holdout actual vs forecasts, error metric bars, residual distribution, and seasonal breakdown.')">
-          <img src="{img_dir}00_milestone2_summary_dashboard.png" alt="Milestone 2 Overview Dashboard" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 00: Multi-Panel Phase 2 Executive Forecasting Dashboard</div>
-            <div class="figure-desc">Synthesizes the complete empirical evaluation: (A) 365-day multi-model forecast trajectory, (B) Comparative RMSE bar rankings, (C) Residual time-series, (D) Error density vs Normal, and (E) Seasonal RMSE breakdown.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Out-of-Sample 365-day Forecast Overlay -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-title">
-            <span>📈</span> Multi-Model Out-of-Sample 365-Day Test Forecast Overlay
-          </div>
-        </div>
-        <div class="figure-card" onclick="openLightbox('{img_dir}05_test_forecast_comparison.png', 'Out-of-sample 365-day forecast overlay: Ground truth test series vs Holt-Winters Damped, SARIMAX (Fourier K=3), ARIMA(2,1,2), Holt Linear, and Seasonal Naive.')">
-          <img src="{img_dir}05_test_forecast_comparison.png" alt="365-Day Test Forecast Comparison" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 05: Delhi Weather Multi-Model Forecast Comparison across 365 Unobserved Days</div>
-            <div class="figure-desc">Highlights seasonal transition zones (Summer, Monsoon, Post-monsoon, Winter). Demonstrates why Holt-Winters and Fourier SARIMAX accurately track the full 20 °C annual swing while non-seasonal ARIMA converges to a flat mean drift.</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- TAB 2: Model Benchmark & Metrics -->
-    <div class="tab-pane" id="tab-model-comparison">
-      
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-title">
-            <span>📋</span> Empirical Benchmark: Comparative Performance on Out-of-Sample Test Holdout
-          </div>
-          <span class="badge badge-best">Evaluated across 365 continuous days (2025–2026)</span>
-        </div>
-        
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Forecasting Approach</th>
-                <th>RMSE (°C)</th>
-                <th>MAE (°C)</th>
-                <th>MAPE (%)</th>
-                <th>R² Score</th>
-                <th>Max Error (°C)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {models_table_html}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="gallery-grid">
-        <div class="figure-card" onclick="openLightbox('{img_dir}06_error_metrics_benchmark.png', 'Comparative error metric bars: RMSE, MAE, MAPE, and R2 across all 7 classical forecasting models.')">
-          <img src="{img_dir}06_error_metrics_benchmark.png" alt="Error Metrics Benchmark" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 06: Quantitative Error Metric Benchmark across Classical Models</div>
-            <div class="figure-desc">Visualizes RMSE, MAE, MAPE, and R² scores. Highlights the superiority of Holt-Winters Damped (RMSE 2.13 °C) and SARIMAX (RMSE 2.34 °C) over baseline persistence (RMSE 7.40 °C).</div>
-          </div>
-        </div>
-
-        <div class="figure-card" onclick="openLightbox('{img_dir}03_arima_grid_search_selection.png', 'ARIMA parameter grid search AIC and BIC heatmaps across AR order p and MA order q.')">
-          <img src="{img_dir}03_arima_grid_search_selection.png" alt="ARIMA Hyperparameter Heatmaps" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 03: Classical ARIMA(p,1,q) Hyperparameter Heatmaps (AIC/BIC)</div>
-            <div class="figure-desc">Rigorous parameter justification: Evaluates AIC and BIC across (p, q) ∈ [0..3] on differenced data (d=1), confirming convergence at ARIMA(2,1,2).</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- TAB 3: Residuals & Diagnostics -->
-    <div class="tab-pane" id="tab-diagnostics">
-
-      <div class="gallery-grid">
-        <div class="figure-card" onclick="openLightbox('{img_dir}01_stationarity_differencing.png', 'Stationarity diagnostics: Raw vs Differenced vs Seasonal Differenced series with ACF and PACF plots.')">
-          <img src="{img_dir}01_stationarity_differencing.png" alt="Stationarity & ACF/PACF Diagnostics" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 01: Stationarity Checks, Differencing & ACF/PACF Order Diagnostics</div>
-            <div class="figure-desc">ADF (p < 1e-18) rejects unit root. KPSS (p >= 0.10) confirms level stationarity. ACF and PACF justify order parameters d=1, p=2, and seasonal period s=365.</div>
-          </div>
-        </div>
-
-        <div class="figure-card" onclick="openLightbox('{img_dir}07_residual_diagnostics_suite.png', 'Residual diagnostic suite: Residuals over time, Histogram vs Normal, Q-Q Plot, and Autocorrelation Function.')">
-          <img src="{img_dir}07_residual_diagnostics_suite.png" alt="Residual Diagnostics Suite" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 07: Holt-Winters Damped Residual Diagnostic Suite</div>
-            <div class="figure-desc">4-quadrant statistical verification: Residuals exhibit zero mean (-0.05 °C), homoscedastic variance, adherence to normal Q-Q line, and white noise ACF (Ljung-Box p > 0.30).</div>
-          </div>
-        </div>
-
-        <div class="figure-card" onclick="openLightbox('{img_dir}02_holt_winters_components.png', 'Holt-Winters decomposition into smoothed level, damped trend, and 365-day seasonal components.')">
-          <img src="{img_dir}02_holt_winters_components.png" alt="Holt-Winters Components" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 02: Holt-Winters State Space Component Breakdown</div>
-            <div class="figure-desc">Displays extracted level l_t, damped trend b_t, and 365-day seasonal indices s_t capturing the ~20 °C annual amplitude.</div>
-          </div>
-        </div>
-
-        <div class="figure-card" onclick="openLightbox('{img_dir}04_sarima_fourier_decomposition.png', 'Dynamic harmonic regression Fourier decomposition of annual solar insolation curve into k=1, 2, 3 harmonics.')">
-          <img src="{img_dir}04_sarima_fourier_decomposition.png" alt="Fourier Harmonics Decomposition" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 04: Dynamic Harmonic SARIMAX Fourier Climatological Envelope</div>
-            <div class="figure-desc">Decomposes seasonal solar insolation into fundamental annual cycle (k=1), heating asymmetry (k=2), and monsoon cloud cooling dip (k=3).</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- TAB 4: Climatological Domain Impact -->
-    <div class="tab-pane" id="tab-domain">
-      
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-title">
-            <span>🌦️</span> Meteorological Seasonal Error Breakdown (Best Model: Holt-Winters Damped)
-          </div>
-        </div>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Season</th>
-                <th>Sample Count</th>
-                <th>Actual Mean</th>
-                <th>Predicted Mean</th>
-                <th>RMSE (°C)</th>
-                <th>MAE (°C)</th>
-                <th>MAPE (%)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {seasons_table_html}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-title">
-            <span>🌍</span> Operational Climatological Stakeholder Applications
-          </div>
-        </div>
-        <div class="domain-grid">
-          <div class="domain-card">
-            <div class="domain-title text-orange">
-              <span>⚡</span> Power Grid & Cooling Load
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-              Delhi's summer power demand spikes past 8,000 MW due to air conditioning load. With a summer MAE of {season_perf.get('Summer', {}).get('MAE', 1.8):.2f} °C, utility dispatchers can predict cooling degree days and reserve transmission capacity within a safe 5% operational buffer.
-            </p>
-          </div>
-
-          <div class="domain-card">
-            <div class="domain-title text-blue">
-              <span>🚨</span> Public Health & Heatwaves
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-              On severe heatwave days (Tmax >= 38 °C), the model maintains an MAE of {extremes_perf.get('heatwave_extreme', {}).get('MAE', 1.9):.2f} °C. This empowers municipal authorities to issue yellow and orange heatwave advisories weeks in advance.
-            </p>
-          </div>
-
-          <div class="domain-card">
-            <div class="domain-title text-emerald">
-              <span>❄️</span> Winter Cold Wave Planning
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">
-              During winter cold snaps (Tmin <= 8 °C), temperature is forecast within an MAE of {extremes_perf.get('coldsnap_extreme', {}).get('MAE', 1.7):.2f} °C. This aids in scheduling night shelters and anticipating thermal smog inversion traps.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-title">
-            <span>🔬</span> Stress Testing: Real-World Extreme Climatological Scenarios
-          </div>
-        </div>
-        <div class="figure-card" onclick="openLightbox('{img_dir}08_domain_scenario_performance.png', 'Domain scenario stress tests: Seasonal error breakdown and extreme heatwave/cold snap prediction accuracy.')">
-          <img src="{img_dir}08_domain_scenario_performance.png" alt="Domain Scenarios Performance" loading="lazy">
-          <div class="figure-body">
-            <div class="figure-title">Figure 08: Seasonal & Extreme Weather Stress Evaluation</div>
-            <div class="figure-desc">Quantifies forecasting errors during peak summer heatwaves, winter cold waves, and monsoon cloud transitions.</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- TAB 5: Phase 1 EDA & Quality Audit -->
-    <div class="tab-pane" id="tab-m1-recap">
-      
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-title">
-            <span>📁</span> Milestone 1 Synopsis Archive: Exploratory Analysis & Quality Audit
-          </div>
-          <span class="badge">Preserved Deliverable</span>
-        </div>
-        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
-          Milestone 1 established the baseline dataset curation across 30 years (1996–2026), proving 100% data continuity (0 duplicate timestamps, 0 missing slots), seasonal strength Fs = 0.936, trend strength Ft = 0.082, and stationarity.
-        </p>
-        
-        <div class="gallery-grid">
-          <div class="figure-card" onclick="openLightbox('{m1_img_dir}00_overview_dashboard.png', 'Milestone 1 Overview Dashboard: 30-year trend, quality audit, STL decomposition, and climatological envelope.')">
-            <img src="{m1_img_dir}00_overview_dashboard.png" alt="Milestone 1 Dashboard" loading="lazy">
-            <div class="figure-body">
-              <div class="figure-title">M1 Figure 00: Multi-Panel Synopsis Overview Dashboard</div>
-              <div class="figure-desc">STL additive decomposition, climatological envelope, and data quality verification.</div>
-            </div>
-          </div>
-
-          <div class="figure-card" onclick="openLightbox('{m1_img_dir}05_stl_decomposition.png', 'LOESS STL Additive Decomposition: Seasonal strength Fs = 0.936.')">
-            <img src="{m1_img_dir}05_stl_decomposition.png" alt="STL Decomposition" loading="lazy">
-            <div class="figure-body">
-              <div class="figure-title">M1 Figure 05: LOESS STL Decomposition (Fs = 0.936)</div>
-              <div class="figure-desc">Proves dominant annual periodicity governing the choice of Holt-Winters and Fourier SARIMAX in Milestone 2.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-  </main>
-
-  <!-- Lightbox Modal -->
-  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <div class="lightbox-content" onclick="event.stopPropagation()">
-      <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
-      <img id="lightbox-img" src="" alt="Full Resolution Figure">
-      <div class="lightbox-caption" id="lightbox-caption"></div>
+<section>
+  <div class="wrap">
+    <div class="head"><h2>How we chose</h2><p>Each step follows from the one before it.</p></div>
+    <div class="pillars">
+      <div><span class="n">1</span><h3>Read the seasons</h3><p>Phase 1 found that the yearly cycle dominates Delhi's temperature (seasonal strength 0.936) while the long-term trend is weak (0.082).</p></div>
+      <div><span class="n">2</span><h3>Damp the trend</h3><p>Holt-Winters with a damping factor stops the forecast from drifting upward forever, which is why it beats the undamped version.</p></div>
+      <div><span class="n">3</span><h3>Check the errors</h3><p>Residuals average near zero, look like noise, and pass the Ljung-Box test (p above 0.30), so little structure is left unexplained.</p></div>
     </div>
   </div>
+</section>
 
-  <footer>
-    <div class="container">
-      <p>Delhi Urban Weather Dynamics (1996–2026) | Time Series Analysis & Forecasting</p>
-      <p style="margin-top: 6px; font-size: 0.75rem;">Phase 2: Mid-Semester Evaluation • Team: Dhruv Saini (S24CSEU0818) &amp; Aarush Saxena (S24CSEU1682) • Evaluation Window: 19-Oct to 07-Nov-2026</p>
+<section id="seasons">
+  <div class="wrap">
+    <div class="head"><h2>Season by season</h2><p>Holt-Winters Damped error in each part of the year. Summer is the hardest to call.</p></div>
+    <div class="seasons">
+      <div class="season w"><h3>Winter</h3><div class="big">{w_sp['RMSE']:.2f}</div><p>°C RMSE over {w_sp['days']} days. Actual mean {w_sp['actual_mean']:.1f} °C, predicted {w_sp['pred_mean']:.1f} °C.</p></div>
+      <div class="season s"><h3>Summer</h3><div class="big">{s_sp['RMSE']:.2f}</div><p>°C RMSE over {s_sp['days']} days. Actual mean {s_sp['actual_mean']:.1f} °C, predicted {s_sp['pred_mean']:.1f} °C.</p></div>
+      <div class="season m"><h3>Monsoon</h3><div class="big">{m_sp['RMSE']:.2f}</div><p>°C RMSE over {m_sp['days']} days. Actual mean {m_sp['actual_mean']:.1f} °C, predicted {m_sp['pred_mean']:.1f} °C.</p></div>
+      <div class="season p"><h3>Post-monsoon</h3><div class="big">{p_sp['RMSE']:.2f}</div><p>°C RMSE over {p_sp['days']} days. Actual mean {p_sp['actual_mean']:.1f} °C, predicted {p_sp['pred_mean']:.1f} °C.</p></div>
     </div>
-  </footer>
+  </div>
+</section>
 
-  <script>
-    // Theme Switcher
-    const themeBtn = document.getElementById('theme-btn');
-    const themeIcon = document.getElementById('theme-icon');
-    const htmlElem = document.documentElement;
+<section id="figures">
+  <div class="wrap">
+    <div class="head"><h2>The figures</h2><p>Select any figure to view it full size.</p></div>
+    <div class="gallery">
+      <button class="fig wide" data-src="{img_dir}05_test_forecast_comparison.png" data-cap="Ground truth against Holt-Winters Damped, SARIMAX, ARIMA, Holt Linear and Seasonal Naive over the 365 test days.">
+        <div class="img"><img src="{img_dir}05_test_forecast_comparison.png" alt="365-day forecast comparison" loading="lazy"></div>
+        <b>Forecast against reality</b><span>Seasonal models follow the full 20 °C annual swing. Plain ARIMA flattens out to an average.</span>
+      </button>
+      <button class="fig" data-src="{img_dir}06_error_metrics_benchmark.png" data-cap="RMSE, MAE, MAPE and R² for every model.">
+        <div class="img"><img src="{img_dir}06_error_metrics_benchmark.png" alt="Error metric comparison" loading="lazy"></div>
+        <b>Error metrics</b><span>RMSE, MAE, MAPE and R² side by side.</span>
+      </button>
+      <button class="fig" data-src="{img_dir}07_residual_diagnostics_suite.png" data-cap="Residuals over time, histogram against Normal, Q-Q plot and autocorrelation.">
+        <div class="img"><img src="{img_dir}07_residual_diagnostics_suite.png" alt="Residual diagnostics" loading="lazy"></div>
+        <b>Residual checks</b><span>Zero-mean, steady variance, no leftover pattern.</span>
+      </button>
+      <button class="fig" data-src="{img_dir}01_stationarity_differencing.png" data-cap="ADF and KPSS stationarity checks, first differencing and ACF/PACF lag structure.">
+        <div class="img"><img src="{img_dir}01_stationarity_differencing.png" alt="Stationarity and ACF/PACF diagnostics" loading="lazy"></div>
+        <b>Stationarity and memory</b><span>ADF and KPSS tests, first differencing and ACF/PACF order checks.</span>
+      </button>
+      <button class="fig" data-src="{img_dir}02_holt_winters_components.png" data-cap="Smoothed level, damped trend and 365-day seasonal indices.">
+        <div class="img"><img src="{img_dir}02_holt_winters_components.png" alt="Holt-Winters components" loading="lazy"></div>
+        <b>Inside Holt-Winters</b><span>Level, damped trend and the yearly seasonal shape.</span>
+      </button>
+      <button class="fig" data-src="{img_dir}03_arima_grid_search_selection.png" data-cap="AIC and BIC grid search across AR order p and MA order q on differenced series (d=1).">
+        <div class="img"><img src="{img_dir}03_arima_grid_search_selection.png" alt="ARIMA grid search heatmaps" loading="lazy"></div>
+        <b>ARIMA order selection</b><span>AIC and BIC heatmaps across p and q identify ARIMA(2,1,2).</span>
+      </button>
+      <button class="fig" data-src="{img_dir}04_sarima_fourier_decomposition.png" data-cap="Dynamic harmonic regression with K=3 Fourier sine/cosine pairs against the 30-year daily average.">
+        <div class="img"><img src="{img_dir}04_sarima_fourier_decomposition.png" alt="Fourier harmonic decomposition" loading="lazy"></div>
+        <b>Fourier harmonics</b><span>Three sine-cosine pairs trace the annual curve and monsoon dip.</span>
+      </button>
+      <button class="fig wide" data-src="{img_dir}08_domain_scenario_performance.png" data-cap="Seasonal error and accuracy during heatwaves and cold waves.">
+        <div class="img"><img src="{img_dir}08_domain_scenario_performance.png" alt="Extreme weather stress test" loading="lazy"></div>
+        <b>Heatwaves and cold snaps</b><span>How the forecast holds up across all four seasons and on extreme days.</span>
+      </button>
+    </div>
+  </div>
+</section>
 
-    function setTheme(theme) {{
-      htmlElem.setAttribute('data-theme', theme);
-      themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('theme', theme);
-    }}
+<section>
+  <div class="wrap">
+    <div class="head"><h2>Who it helps</h2></div>
+    <div class="uses">
+      <div><h3>Power grid</h3><p>Summer demand in Delhi passes 8,000 MW. A summer error near 1.9 °C lets planners reserve capacity ahead of cooling-heavy days.</p></div>
+      <div><h3>Public health</h3><p>On days of 38 °C and above, the model stays within roughly 1.7 °C, enough to support early heatwave advisories.</p></div>
+      <div><h3>Winter planning</h3><p>On cold days at or below 8 °C, error is about 2 °C, useful for scheduling night shelters and anticipating smog trapping.</p></div>
+    </div>
+  </div>
+</section>
+</main>
 
-    themeBtn.addEventListener('click', () => {{
-      const current = htmlElem.getAttribute('data-theme') || 'dark';
-      setTheme(current === 'dark' ? 'light' : 'dark');
-    }});
+<footer>
+  <div class="wrap">
+    <div class="grid">
+      <h4>Time Series Analysis &amp; Forecasting</h4>
+      <div>
+        <small>Team</small>
+        Dhruv Saini<br>Aarush Saxena
+      </div>
+      <div>
+        <small>Files</small>
+        <a href="{out_prefix}Milestone2_MidSem_Report.md">Academic report</a>
+        <a href="{out_prefix}forecast_comparison.csv" download>Forecast CSV</a>
+        <a href="{out_prefix}metrics.json">Metrics JSON</a>
+        <a href="https://github.com/dhruvsaini-code/weather-forecasting">GitHub repository</a>
+      </div>
+    </div>
+    <p class="fine">Phase 2, mid-semester evaluation. Evaluation window 19 Oct to 7 Nov 2026.</p>
+  </div>
+</footer>
 
-    // Saved theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {{
-      setTheme(savedTheme);
-    }}
+<dialog id="lb"><img id="lbImg" alt=""><p id="lbCap"></p></dialog>
 
-    // Tab Navigation
-    const tabs = document.querySelectorAll('.nav-tab');
-    const panes = document.querySelectorAll('.tab-pane');
+<script>
+const models=[
+  {{n:'Holt-Winters Damped',f:'Triple exponential smoothing',r:{hw_d['RMSE']:.3f},r2:{fmt_r2(hw_d['R2'])},best:1}},
+  {{n:'Holt-Winters Additive',f:'Triple exponential smoothing',r:{hw_a['RMSE']:.3f},r2:{fmt_r2(hw_a['R2'])}}},
+  {{n:'SARIMAX, Fourier K=3',f:'Dynamic harmonic regression',r:{sarimax['RMSE']:.3f},r2:{fmt_r2(sarimax['R2'])}}},
+  {{n:'Seasonal Naive',f:'Repeat last year',r:{s_naive['RMSE']:.3f},r2:{fmt_r2(s_naive['R2'])}}},
+  {{n:'ARIMA(2,1,2)',f:'Box-Jenkins, non-seasonal',r:{arima['RMSE']:.3f},r2:{fmt_r2(arima['R2'])}}},
+  {{n:'Naive',f:'Repeat yesterday',r:{naive['RMSE']:.3f},r2:{fmt_r2(naive['R2'])}}},
+  {{n:'Holt Linear Trend',f:'Double exponential smoothing',r:{holt['RMSE']:.3f},r2:{fmt_r2(holt['R2'])}}}
+];
+document.getElementById('modelList').innerHTML=models.map(m=>
+  `<div class="model${{m.best?' best':''}}"><h3>${{m.n}}<em>${{m.f}}</em></h3>
+   <div class="bar" role="img" aria-label="RMSE ${{m.r}}"><i style="width:${{(m.r/7.5*100).toFixed(1)}}%"></i></div>
+   <div class="num">${{m.r.toFixed(2)}}<small>RMSE °C</small></div>
+   <div class="num">${{m.r2.toFixed(2)}}<small>R²</small></div></div>`).join('');
 
-    tabs.forEach(tab => {{
-      tab.addEventListener('click', () => {{
-        tabs.forEach(t => t.classList.remove('active'));
-        panes.forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        const target = tab.getAttribute('data-tab');
-        const activePane = document.getElementById(target);
-        if (activePane) activePane.classList.add('active');
-      }});
-    }});
-
-    // Lightbox Controls
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxCaption = document.getElementById('lightbox-caption');
-
-    function openLightbox(src, caption) {{
-      lightboxImg.src = src;
-      lightboxCaption.textContent = caption || '';
-      lightbox.classList.add('active');
-    }}
-
-    function closeLightbox() {{
-      lightbox.classList.remove('active');
-    }}
-
-    document.addEventListener('keydown', (e) => {{
-      if (e.key === 'Escape') closeLightbox();
-    }});
-  </script>
+const lb=document.getElementById('lb'),img=document.getElementById('lbImg'),cap=document.getElementById('lbCap');
+function open(src,c){{img.src=src;img.alt=c||'';cap.textContent=c||'';lb.showModal()}}
+document.querySelectorAll('.fig').forEach(b=>b.addEventListener('click',()=>open(b.dataset.src,b.dataset.cap)));
+document.querySelector('.hero-img img').addEventListener('click',e=>open(e.target.src,e.target.dataset.zoom));
+lb.addEventListener('click',()=>lb.close());
+</script>
 </body>
 </html>
 """
