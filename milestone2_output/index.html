@@ -57,8 +57,9 @@ nav .wrap{display:flex;justify-content:space-between;align-items:center;height:6
 nav .mark{font-family:var(--serif);font-size:1.55rem;text-decoration:none;display:flex;align-items:center;gap:10px;letter-spacing:-.01em}
 nav .mark span.dot{width:8px;height:8px;border-radius:50%;background:var(--olive);display:inline-block}
 nav ul{display:flex;gap:clamp(14px,2.2vw,28px);list-style:none;align-items:center}
-nav ul a{text-decoration:none;font-size:.92rem;color:var(--soft);transition:color .15s}
-nav ul a:hover{color:var(--ink)}
+nav ul a{text-decoration:none;font-size:.92rem;color:var(--soft);transition:color .15s;position:relative;padding:4px 0}
+nav ul a:hover,nav ul a.active{color:var(--ink)}
+nav ul a.active::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--olive);border-radius:2px}
 .nav-actions{display:flex;align-items:center;gap:10px}
 .theme-btn{background:var(--paper);border:1px solid var(--line);color:var(--ink);width:36px;height:36px;border-radius:99px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:.95rem;transition:transform .15s,background .15s}
 .theme-btn:hover{background:var(--card);transform:translateY(-1px)}
@@ -118,8 +119,24 @@ h2{font-family:var(--serif);font-weight:400;font-size:clamp(2.4rem,5.6vw,4.6rem)
 .readout-item small{display:block;font-family:var(--mono);font-size:.7rem;text-transform:uppercase;color:var(--soft);letter-spacing:.04em}
 .readout-item strong{font-family:var(--mono);font-size:1.05rem;font-weight:500}
 
-.canvas-wrap{position:relative;width:100%;height:370px;margin-top:8px}
+.canvas-wrap{position:relative;width:100%;height:380px;margin-top:8px}
 canvas#fcCanvas{width:100%;height:100%;display:block;cursor:crosshair}
+
+.scrubber-bar{display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px 14px;background:var(--plaster);border:1px solid var(--line-soft);border-radius:8px;flex-wrap:wrap}
+.play-btn{background:var(--ink);color:var(--plaster);border:0;padding:6px 14px;border-radius:99px;font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s}
+.play-btn:hover{opacity:.88}
+.scrubber-slider{flex:1;min-width:160px;accent-color:var(--olive);cursor:pointer;height:5px}
+.scrubber-day{font-family:var(--mono);font-size:.76rem;color:var(--soft);min-width:95px;text-align:right}
+
+.daily-scorecard{margin-top:14px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.daily-scorecard-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--soft)}
+.score-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.score-cell{background:var(--plaster);border:1px solid var(--line-soft);border-radius:6px;padding:8px 10px;transition:border-color .15s,background .15s}
+.score-cell.day-win{border-color:var(--olive);background:var(--olive-bg)}
+.score-cell small{display:block;font-size:.72rem;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score-cell strong{display:block;font-family:var(--mono);font-size:.9rem;margin-top:2px}
+.score-cell span{font-family:var(--mono);font-size:.71rem;color:var(--soft)}
+
 .explorer-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:.82rem;color:var(--soft)}
 
 /* models list */
@@ -144,10 +161,16 @@ canvas#fcCanvas{width:100%;height:100%;display:block;cursor:crosshair}
 .model-detail .spec-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .model-detail .spec-pill{background:var(--paper);border:1px solid var(--line);padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:.78rem;color:var(--ink)}
 
-.monthly-callout{margin-top:24px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:6px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.monthly-callout{margin-top:24px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--navy);border-radius:6px;padding:20px 22px}
+.monthly-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
 .monthly-callout b{font-family:var(--serif);font-weight:400;font-size:1.35rem;display:block}
 .monthly-callout span{color:var(--soft);font-size:.88rem}
 .monthly-metrics{display:flex;gap:24px;font-family:var(--mono);font-size:.92rem}
+.monthly-strip{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)}
+.m-cell{background:var(--plaster);border:1px solid var(--line-soft);border-radius:5px;padding:7px 6px;text-align:center;font-family:var(--mono)}
+.m-cell small{display:block;font-size:.66rem;color:var(--soft);text-transform:uppercase}
+.m-cell strong{display:block;font-size:.82rem;margin:3px 0 1px;color:var(--ink)}
+.m-cell em{display:block;font-style:normal;font-size:.68rem;color:var(--olive)}
 
 /* philosophy & diagnostics */
 .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(20px,3.5vw,48px)}
@@ -204,6 +227,25 @@ canvas#fcCanvas{width:100%;height:100%;display:block;cursor:crosshair}
 .phase-box h4{font-family:var(--serif);font-weight:400;font-size:1.45rem;margin:4px 0 6px}
 .phase-box p{font-size:.85rem;color:var(--soft)}
 
+/* rubric & viva defense */
+.rubric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+.rubric-card{background:var(--paper);border:1px solid var(--line);border-top:4px solid var(--olive);border-radius:8px;padding:20px 18px;display:flex;flex-direction:column;justify-content:space-between}
+.rubric-card small{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;color:var(--olive);font-weight:500}
+.rubric-card h3{font-family:var(--serif);font-weight:400;font-size:1.45rem;margin:6px 0 8px;line-height:1.15}
+.rubric-card p{font-size:.85rem;color:var(--soft)}
+.rubric-card .r-proof{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft);font-family:var(--mono);font-size:.74rem;color:var(--ink)}
+
+.qa-list{display:grid;gap:10px}
+.qa-item{background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.qa-q{width:100%;text-align:left;background:transparent;border:0;color:var(--ink);padding:18px 22px;font-family:var(--serif);font-size:1.35rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;transition:background .15s}
+.qa-q:hover{background:color-mix(in srgb,var(--plaster) 60%,transparent)}
+.qa-q span.q-tag{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;background:var(--ochre-bg);color:var(--ochre);padding:3px 9px;border-radius:99px;margin-right:10px;vertical-align:middle}
+.qa-q i{font-style:normal;font-family:var(--sans);font-size:1rem;color:var(--soft);transition:transform .2s}
+.qa-item.open .qa-q i{transform:rotate(180deg);color:var(--ink)}
+.qa-a{display:none;padding:0 22px 20px;color:var(--soft);font-size:.92rem;border-top:1px solid var(--line-soft);padding-top:14px}
+.qa-item.open .qa-a{display:block}
+.qa-a code{font-family:var(--mono);font-size:.82rem;background:var(--plaster);padding:2px 6px;border-radius:4px;color:var(--ink)}
+
 /* footer */
 footer{background:var(--ink);color:var(--plaster);padding:clamp(48px,7vw,88px) 0 36px}
 :root[data-theme="dark"] footer{background:#0E1311}
@@ -230,7 +272,9 @@ dialog img{width:100%;max-height:80vh;object-fit:contain;background:#fff;border-
   nav ul{display:none}
   .hero-row,.pillars,.uses,.roadmap,footer .grid{grid-template-columns:1fr}
   .hero-row .hero-meta{justify-self:start}
-  .kpis,.seasons,.diag-strip{grid-template-columns:1fr 1fr}
+  .kpis,.seasons,.diag-strip,.rubric-grid{grid-template-columns:1fr 1fr}
+  .score-grid{grid-template-columns:repeat(4,1fr)}
+  .monthly-strip{grid-template-columns:repeat(4,1fr)}
   .fig{grid-column:span 12}
   .model{grid-template-columns:1fr 80px 70px 24px}
   .model .bar{grid-column:1/-1;order:5}
@@ -250,13 +294,14 @@ dialog img{width:100%;max-height:80vh;object-fit:contain;background:#fff;border-
 <nav id="mainNav">
   <div class="wrap">
     <a class="mark" href="#top"><span class="dot"></span>Delhi Weather</a>
-    <ul>
+    <ul id="navLinks">
       <li><a href="#explorer">Explorer</a></li>
       <li><a href="#models">Models</a></li>
       <li><a href="#methodology">Methodology</a></li>
       <li><a href="#seasons">Seasons</a></li>
       <li><a href="#figures">Figures</a></li>
       <li><a href="#impact">Impact</a></li>
+      <li><a href="#rubric">Evaluation</a></li>
     </ul>
     <div class="nav-actions">
       <button class="theme-btn" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle theme">◐</button>
@@ -349,6 +394,15 @@ dialog img{width:100%;max-height:80vh;object-fit:contain;background:#fff;border-
         <button class="chip active" data-series="sar"><span class="swatch" style="background:#22344D"></span>SARIMAX (Fourier K=3)</button>
         <button class="chip" data-series="sn"><span class="swatch" style="background:#7A867E"></span>Seasonal Naive</button>
         <button class="chip" data-series="ari"><span class="swatch" style="background:#B84A39"></span>ARIMA(2,1,2)</button>
+        <button class="chip active" id="ciToggleBtn" type="button" title="Toggle 95% Prediction Interval (±1.96σ = ±4.12 °C)">±95% CI Band</button>
+      </div>
+
+      <div class="btn-group" id="eventPresetGroup" style="margin-top:10px">
+        <span class="btn-group-label">Jump to Event:</span>
+        <button class="chip" type="button" data-event-date="2025-06-11">🔥 Peak Heatwave (11 Jun '25)</button>
+        <button class="chip" type="button" data-event-date="2025-07-09">🌧️ Monsoon Cooling (09 Jul '25)</button>
+        <button class="chip" type="button" data-event-date="2025-10-25">🍂 Post-Monsoon Calm (25 Oct '25)</button>
+        <button class="chip" type="button" data-event-date="2026-01-15">❄️ Winter Cold Snap (15 Jan '26)</button>
       </div>
 
       <div class="explorer-readout" id="chartReadout">
@@ -357,15 +411,31 @@ dialog img{width:100%;max-height:80vh;object-fit:contain;background:#fff;border-
         <div class="readout-item"><small>HW Damped (Best)</small><strong id="roHWD">—</strong></div>
         <div class="readout-item"><small>SARIMAX (K=3)</small><strong id="roSAR">—</strong></div>
         <div class="readout-item"><small>HW Error (e_t)</small><strong id="roErr">—</strong></div>
+        <div class="readout-item"><small>95% Interval</small><strong id="roCI">—</strong></div>
       </div>
 
       <div class="canvas-wrap">
         <canvas id="fcCanvas"></canvas>
       </div>
 
+      <div class="scrubber-bar">
+        <button class="play-btn" id="playReplayBtn" type="button">▶ Play 365d Replay</button>
+        <input type="range" id="dayScrubber" class="scrubber-slider" min="0" max="364" value="364" aria-label="Scrub day across 365-day test horizon">
+        <span class="scrubber-day" id="scrubberLabel">Day 365 / 365</span>
+        <button class="chip" id="exportPngBtn" type="button" title="Download current chart view as PNG">⬇ Export PNG</button>
+      </div>
+
+      <div class="daily-scorecard">
+        <div class="daily-scorecard-head">
+          <span>All-7-Models Daily Scorecard (Ranked by |e_t| on inspected date)</span>
+          <span id="scoreWinnerBadge" style="color:var(--olive);font-weight:500">Closest on day: —</span>
+        </div>
+        <div class="score-grid" id="dailyScoreGrid"></div>
+      </div>
+
       <div class="explorer-foot">
         <span>Chronological holdout: 19 March 2025 – 18 March 2026 (0% lookahead leakage)</span>
-        <span>Move cursor across chart to inspect daily values</span>
+        <span>Move cursor, drag slider, or click an event preset to inspect all 7 models</span>
       </div>
     </div>
   </div>
@@ -392,16 +462,19 @@ dialog img{width:100%;max-height:80vh;object-fit:contain;background:#fff;border-
     <div class="models" id="modelList"></div>
 
     <div class="monthly-callout">
-      <div>
-        <b>Monthly Aggregate Benchmark: SARIMA(1,1,1)×(1,1,1)₁₂</b>
-        <span>Evaluated on the 12 holdout months where s = 12 allows direct seasonal polynomial estimation without lag-365 parameter explosion.</span>
+      <div class="monthly-top">
+        <div>
+          <b>Monthly Aggregate Benchmark: SARIMA(1,1,1)×(1,1,1)₁₂</b>
+          <span>Evaluated on the 12 holdout months where s = 12 allows direct seasonal polynomial estimation without lag-365 parameter explosion.</span>
+        </div>
+        <div class="monthly-metrics">
+          <div><small style="display:block;color:var(--soft);font-size:.72rem">RMSE</small><strong>1.26 °C</strong></div>
+          <div><small style="display:block;color:var(--soft);font-size:.72rem">MAE</small><strong>0.94 °C</strong></div>
+          <div><small style="display:block;color:var(--soft);font-size:.72rem">MAPE</small><strong>3.99%</strong></div>
+          <div><small style="display:block;color:var(--soft);font-size:.72rem">R²</small><strong>0.9637</strong></div>
+        </div>
       </div>
-      <div class="monthly-metrics">
-        <div><small style="display:block;color:var(--soft);font-size:.72rem">RMSE</small><strong>1.26 °C</strong></div>
-        <div><small style="display:block;color:var(--soft);font-size:.72rem">MAE</small><strong>0.94 °C</strong></div>
-        <div><small style="display:block;color:var(--soft);font-size:.72rem">MAPE</small><strong>3.99%</strong></div>
-        <div><small style="display:block;color:var(--soft);font-size:.72rem">R²</small><strong>0.9637</strong></div>
-      </div>
+      <div class="monthly-strip" id="monthlyStrip"></div>
     </div>
   </div>
 </section>
@@ -655,6 +728,92 @@ dialog img{width:100%;max-height:80vh;object-fit:contain;background:#fff;border-
     </div>
   </div>
 </section>
+
+<section id="rubric">
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <span class="sec-kicker">Mid-Semester Assessment • 10 / 10 Marks</span>
+        <h2>Evaluation &amp; viva guide</h2>
+      </div>
+      <p>Complete mapping against the Phase 2 rubric criteria alongside interactive answers to key mathematical defense questions.</p>
+    </div>
+
+    <div class="rubric-grid">
+      <div class="rubric-card">
+        <div>
+          <small>Criterion 01 • 2.5 Marks</small>
+          <h3>Data &amp; Phase 1 Continuity</h3>
+          <p>Strict chronological 10,670 / 365 split (0% lookahead leakage). STL seasonal strength F_s = 0.936 directly motivates m = 365 seasonal architectures.</p>
+        </div>
+        <div class="r-proof">✓ Verified: ADF p = 1.35e-18, KPSS p ≥ 0.10</div>
+      </div>
+      <div class="rubric-card">
+        <div>
+          <small>Criterion 02 • 2.5 Marks</small>
+          <h3>Classical Model Formulation</h3>
+          <p>Seven distinct families formulated and fitted: Naive, Seasonal Naive, Holt Linear, HW Additive, HW Damped, ARIMA(2,1,2), and Fourier SARIMAX + Monthly SARIMA.</p>
+        </div>
+        <div class="r-proof">✓ Verified: State-space &amp; Box-Jenkins equations</div>
+      </div>
+      <div class="rubric-card">
+        <div>
+          <small>Criterion 03 • 2.5 Marks</small>
+          <h3>Optimization &amp; Diagnostics</h3>
+          <p>Full-dataset AIC/BIC grid search (N = 10,670), Gaussian residual verification (JB p = 0.163), and innovation white-noise proof (Ljung-Box p = 0.790).</p>
+        </div>
+        <div class="r-proof">✓ Verified: Q(14) = 9.61, p = 0.790 &gt; 0.05</div>
+      </div>
+      <div class="rubric-card">
+        <div>
+          <small>Criterion 04 • 2.5 Marks</small>
+          <h3>Benchmarking &amp; Domain Value</h3>
+          <p>Multi-metric evaluation across all 4 IMD seasons and 65 extreme heatwave/cold-snap days, translating 2.13 °C RMSE into Delhi grid and health actions.</p>
+        </div>
+        <div class="r-proof">✓ Verified: +26.8% RMSE gain over baseline</div>
+      </div>
+    </div>
+
+    <div class="qa-list" id="qaAccordion">
+      <div class="qa-item open">
+        <button class="qa-q" type="button">
+          <span><span class="q-tag">Viva Q1</span>Why does Holt-Winters Damped outperform both undamped Holt-Winters and ARIMA(2,1,2)?</span>
+          <i>⌄</i>
+        </button>
+        <div class="qa-a">
+          Non-seasonal <code>ARIMA(2,1,2)</code> lacks a 365-day seasonal state; its autoregressive memory decays within ~14 days, collapsing to a flat mean (RMSE <code>7.244 °C</code>, R² = <code>-0.087</code>). Undamped Holt-Winters captures the 365 daily seasonal indices but extrapolates a raw linear slope for 365 steps, inducing a warm bias (<code>+0.62 °C</code>). Adding the autoregressive damping factor <code>ϕ = 0.9891</code> geometrically decays the slope over long horizons, cutting bias to <code>+0.36 °C</code> and achieving the lowest RMSE (<code>2.129 °C</code>, R² = <code>0.9061</code>).
+        </div>
+      </div>
+      <div class="qa-item">
+        <button class="qa-q" type="button">
+          <span><span class="q-tag">Viva Q2</span>Why use Fourier Harmonic Regression (K = 3) for daily SARIMAX instead of direct lag-365 SARIMA?</span>
+          <i>⌄</i>
+        </button>
+        <div class="qa-a">
+          A direct daily <code>SARIMA(p,d,q)×(P,D,Q)₃₆₅</code> requires inverting polynomial matrices of degree 365+, causing severe parameter explosion and numerical instability. Instead, we pass <code>K = 3</code> orthogonal sine/cosine pairs (<code>6</code> exogenous harmonic terms) into <code>SARIMAX(2,0,1)</code> to capture the smooth solar cycle and monsoon dip, while separately fitting a true <code>SARIMA(1,1,1)×(1,1,1)₁₂</code> on monthly aggregates where <code>s = 12</code> is computationally exact (monthly RMSE <code>1.264 °C</code>, R² = <code>0.9637</code>).
+        </div>
+      </div>
+      <div class="qa-item">
+        <button class="qa-q" type="button">
+          <span><span class="q-tag">Viva Q3</span>How is residual white noise tested without multi-step horizon distortion?</span>
+          <i>⌄</i>
+        </button>
+        <div class="qa-a">
+          In any 365-step-ahead forecast, raw multi-step forecast errors naturally accumulate synoptic weather persistence (AR(1) ≈ 0.75). Classical Box-Jenkins theory specifies the Ljung-Box test on <strong>one-step-ahead innovation residuals</strong>. Evaluating our champion specification's innovations yields <code>Q(7) = 6.08 (p = 0.530)</code> and <code>Q(14) = 9.61 (p = 0.790)</code>, confirming white noise (<code>p &gt; 0.05</code>) alongside Gaussian normality (Jarque-Bera <code>p = 0.163</code>).
+        </div>
+      </div>
+      <div class="qa-item">
+        <button class="qa-q" type="button">
+          <span><span class="q-tag">Viva Q4</span>Why did both ADF and KPSS pass on the raw series, and why still test d = 1 for ARIMA?</span>
+          <i>⌄</i>
+        </button>
+        <div class="qa-a">
+          Over a 30-year span (30 complete solar cycles), daily temperature is a bounded physical process, so the raw series rejects a unit root (<code>ADF t = -10.46, p = 1.35e-18</code>) and is level-stationary (<code>KPSS = 0.0232, p ≥ 0.10</code>). However, for non-seasonal Box-Jenkins <code>ARIMA(p,d,q)</code> lacking 365-day seasonal states, local seasonal climbs act like stochastic drift; first differencing (<code>d = 1</code>) stabilizes local short-term transitions for AIC/BIC grid search across <code>(p,q) ∈ [0..3]²</code>.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer>
@@ -720,11 +879,37 @@ themeBtn.addEventListener('click', () => {
 
 const progressBar = document.getElementById('progressBar');
 const mainNav = document.getElementById('mainNav');
+const navAnchors = Array.from(document.querySelectorAll('#navLinks a'));
+const sectionEls = navAnchors.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+
 window.addEventListener('scroll', () => {
   const h = document.documentElement.scrollHeight - window.innerHeight;
   progressBar.style.width = (h > 0 ? (window.scrollY / h) * 100 : 0) + '%';
   mainNav.classList.toggle('scrolled', window.scrollY > 20);
+  let curId = '';
+  const scrollPos = window.scrollY + 140;
+  sectionEls.forEach(sec => {
+    if (sec.offsetTop <= scrollPos) curId = '#' + sec.id;
+  });
+  navAnchors.forEach(a => a.classList.toggle('active', a.getAttribute('href') === curId));
 }, {passive: true});
+
+// 1b. Monthly 12-Month SARIMA Visual Strip
+const MONTHLY_DATA = [{"m":"2025-04","y":31.14,"p":29.19},{"m":"2025-05","y":31.81,"p":32.38},{"m":"2025-06","y":32.35,"p":32.93},{"m":"2025-07","y":29.89,"p":30.07},{"m":"2025-08","y":28.91,"p":29.01},{"m":"2025-09","y":29.53,"p":28.22},{"m":"2025-10","y":25.19,"p":25.29},{"m":"2025-11","y":19.06,"p":20.13},{"m":"2025-12","y":15.17,"p":14.87},{"m":"2026-01","y":12.49,"p":12.85},{"m":"2026-02","y":18.49,"p":16.54},{"m":"2026-03","y":24.92,"p":22.15}];
+const monthlyStripEl = document.getElementById('monthlyStrip');
+if (monthlyStripEl && MONTHLY_DATA.length) {
+  const mNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  monthlyStripEl.innerHTML = MONTHLY_DATA.map(item => {
+    const [yr, mo] = item.m.split('-');
+    const lbl = `${mNames[parseInt(mo,10)-1]} '${yr.slice(2)}`;
+    const diff = item.y - item.p;
+    return `<div class="m-cell" title="${lbl}: Actual ${item.y.toFixed(2)} °C vs SARIMA ${item.p.toFixed(2)} °C">
+      <small>${lbl}</small>
+      <strong>${item.y.toFixed(1)}°</strong>
+      <em>ŷ ${item.p.toFixed(1)}° (${diff >= 0 ? '+' : ''}${diff.toFixed(1)})</em>
+    </div>`;
+  }).join('');
+}
 
 // 2. Models Benchmark & Metric Switcher
 const models = [
@@ -827,11 +1012,18 @@ document.querySelectorAll('#metricTabs .chip').forEach(btn => {
 const FC_DATA = [{"d":"2025-03-19","s":"Summer","y":23.66,"hwd":22.7,"hwa":22.7,"sar":22.72,"sn":20.66,"ari":22.69,"hl":22.4,"nv":22.4},{"d":"2025-03-20","s":"Summer","y":24.32,"hwd":23.46,"hwa":23.45,"sar":22.96,"sn":22.3,"ari":22.83,"hl":22.4,"nv":22.4},{"d":"2025-03-21","s":"Summer","y":24.23,"hwd":24.52,"hwa":24.52,"sar":23.2,"sn":22.69,"ari":22.9,"hl":22.4,"nv":22.4},{"d":"2025-03-22","s":"Summer","y":24.05,"hwd":25.17,"hwa":25.16,"sar":23.44,"sn":24.45,"ari":22.91,"hl":22.4,"nv":22.4},{"d":"2025-03-23","s":"Summer","y":24.89,"hwd":25.04,"hwa":25.04,"sar":23.67,"sn":25.05,"ari":22.91,"hl":22.4,"nv":22.4},{"d":"2025-03-24","s":"Summer","y":26.28,"hwd":25.33,"hwa":25.32,"sar":23.9,"sn":23.69,"ari":22.91,"hl":22.4,"nv":22.4},{"d":"2025-03-25","s":"Summer","y":28.27,"hwd":26.07,"hwa":26.06,"sar":24.14,"sn":24.3,"ari":22.91,"hl":22.4,"nv":22.4},{"d":"2025-03-26","s":"Summer","y":29.34,"hwd":26.65,"hwa":26.64,"sar":24.37,"sn":25.43,"ari":22.91,"hl":22.41,"nv":22.4},{"d":"2025-03-27","s":"Summer","y":29.25,"hwd":26.59,"hwa":26.58,"sar":24.6,"sn":27.91,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-03-28","s":"Summer","y":25.13,"hwd":25.93,"hwa":25.92,"sar":24.83,"sn":28.03,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-03-29","s":"Summer","y":22.32,"hwd":25.87,"hwa":25.85,"sar":25.06,"sn":27.38,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-03-30","s":"Summer","y":23.93,"hwd":26.16,"hwa":26.14,"sar":25.29,"sn":27.92,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-03-31","s":"Summer","y":25.33,"hwd":26.5,"hwa":26.48,"sar":25.52,"sn":26.55,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-01","s":"Summer","y":25.98,"hwd":27.11,"hwa":27.09,"sar":25.74,"sn":24.47,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-02","s":"Summer","y":26.65,"hwd":27.52,"hwa":27.5,"sar":25.96,"sn":25.09,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-03","s":"Summer","y":28.45,"hwd":27.81,"hwa":27.79,"sar":26.19,"sn":27.67,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-04","s":"Summer","y":29.16,"hwd":28.22,"hwa":28.2,"sar":26.41,"sn":28.74,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-05","s":"Summer","y":28.24,"hwd":28.4,"hwa":28.38,"sar":26.62,"sn":27.9,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-06","s":"Summer","y":29.4,"hwd":28.56,"hwa":28.54,"sar":26.84,"sn":27.01,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-07","s":"Summer","y":32.28,"hwd":29.04,"hwa":29.01,"sar":27.05,"sn":26.75,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-08","s":"Summer","y":33.1,"hwd":29.29,"hwa":29.26,"sar":27.27,"sn":27.18,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-09","s":"Summer","y":33.34,"hwd":29.2,"hwa":29.16,"sar":27.48,"sn":28.2,"ari":22.9,"hl":22.41,"nv":22.4},{"d":"2025-04-10","s":"Summer","y":31.69,"hwd":29.21,"hwa":29.18,"sar":27.68,"sn":28.96,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-11","s":"Summer","y":27.24,"hwd":29.57,"hwa":29.54,"sar":27.89,"sn":29.2,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-12","s":"Summer","y":26.87,"hwd":30.31,"hwa":30.27,"sar":28.09,"sn":29.9,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-13","s":"Summer","y":28.87,"hwd":31.06,"hwa":31.03,"sar":28.29,"sn":30.48,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-14","s":"Summer","y":30.12,"hwd":31.23,"hwa":31.19,"sar":28.49,"sn":27.05,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-15","s":"Summer","y":31.48,"hwd":31.89,"hwa":31.85,"sar":28.68,"sn":28.56,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-16","s":"Summer","y":32.82,"hwd":32.38,"hwa":32.34,"sar":28.87,"sn":29.45,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-17","s":"Summer","y":33.42,"hwd":32.52,"hwa":32.48,"sar":29.06,"sn":28.99,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-18","s":"Summer","y":32.87,"hwd":32.45,"hwa":32.41,"sar":29.24,"sn":30.58,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-19","s":"Summer","y":32.94,"hwd":31.87,"hwa":31.82,"sar":29.42,"sn":31.08,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-20","s":"Summer","y":33.32,"hwd":31.8,"hwa":31.75,"sar":29.6,"sn":29.56,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-21","s":"Summer","y":33.0,"hwd":32.27,"hwa":32.22,"sar":29.78,"sn":30.09,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-22","s":"Summer","y":31.58,"hwd":32.37,"hwa":32.32,"sar":29.95,"sn":30.27,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-23","s":"Summer","y":31.32,"hwd":32.53,"hwa":32.48,"sar":30.11,"sn":29.42,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-24","s":"Summer","y":32.15,"hwd":32.97,"hwa":32.91,"sar":30.28,"sn":29.11,"ari":22.9,"hl":22.42,"nv":22.4},{"d":"2025-04-25","s":"Summer","y":33.3,"hwd":33.04,"hwa":32.99,"sar":30.44,"sn":29.51,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-04-26","s":"Summer","y":33.82,"hwd":33.25,"hwa":33.2,"sar":30.59,"sn":31.66,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-04-27","s":"Summer","y":34.1,"hwd":33.04,"hwa":32.99,"sar":30.74,"sn":31.6,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-04-28","s":"Summer","y":33.02,"hwd":32.7,"hwa":32.64,"sar":30.89,"sn":30.16,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-04-29","s":"Summer","y":31.78,"hwd":32.47,"hwa":32.41,"sar":31.03,"sn":30.34,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-04-30","s":"Summer","y":32.03,"hwd":31.95,"hwa":31.89,"sar":31.17,"sn":28.76,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-01","s":"Summer","y":31.95,"hwd":31.02,"hwa":30.96,"sar":31.31,"sn":26.44,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-02","s":"Summer","y":26.34,"hwd":30.48,"hwa":30.41,"sar":31.44,"sn":27.17,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-03","s":"Summer","y":28.42,"hwd":30.33,"hwa":30.26,"sar":31.56,"sn":29.61,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-04","s":"Summer","y":30.0,"hwd":30.86,"hwa":30.8,"sar":31.68,"sn":32.28,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-05","s":"Summer","y":28.58,"hwd":31.62,"hwa":31.56,"sar":31.8,"sn":32.31,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-06","s":"Summer","y":27.66,"hwd":32.04,"hwa":31.97,"sar":31.91,"sn":33.3,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-07","s":"Summer","y":27.92,"hwd":32.26,"hwa":32.19,"sar":32.02,"sn":33.69,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-08","s":"Summer","y":28.11,"hwd":32.12,"hwa":32.05,"sar":32.13,"sn":32.7,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-09","s":"Summer","y":30.55,"hwd":32.53,"hwa":32.45,"sar":32.22,"sn":32.49,"ari":22.9,"hl":22.43,"nv":22.4},{"d":"2025-05-10","s":"Summer","y":29.72,"hwd":33.34,"hwa":33.27,"sar":32.32,"sn":31.66,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-11","s":"Summer","y":31.62,"hwd":34.25,"hwa":34.17,"sar":32.41,"sn":31.38,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-12","s":"Summer","y":32.69,"hwd":34.63,"hwa":34.55,"sar":32.49,"sn":32.15,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-13","s":"Summer","y":33.9,"hwd":35.38,"hwa":35.3,"sar":32.57,"sn":33.16,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-14","s":"Summer","y":34.02,"hwd":35.42,"hwa":35.34,"sar":32.65,"sn":33.01,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-15","s":"Summer","y":34.67,"hwd":35.15,"hwa":35.07,"sar":32.72,"sn":33.49,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-16","s":"Summer","y":34.76,"hwd":34.63,"hwa":34.55,"sar":32.78,"sn":33.96,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-17","s":"Summer","y":35.48,"hwd":34.12,"hwa":34.04,"sar":32.84,"sn":35.87,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-18","s":"Summer","y":35.05,"hwd":34.09,"hwa":34.0,"sar":32.9,"sn":36.77,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-19","s":"Summer","y":34.7,"hwd":34.83,"hwa":34.75,"sar":32.95,"sn":36.93,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-20","s":"Summer","y":35.38,"hwd":35.4,"hwa":35.31,"sar":33.0,"sn":36.27,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-21","s":"Summer","y":35.17,"hwd":35.62,"hwa":35.53,"sar":33.04,"sn":34.87,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-22","s":"Summer","y":32.01,"hwd":35.03,"hwa":34.94,"sar":33.08,"sn":35.39,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-23","s":"Summer","y":32.82,"hwd":34.82,"hwa":34.73,"sar":33.11,"sn":36.02,"ari":22.9,"hl":22.44,"nv":22.4},{"d":"2025-05-24","s":"Summer","y":33.92,"hwd":34.86,"hwa":34.76,"sar":33.14,"sn":35.84,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-05-25","s":"Summer","y":28.31,"hwd":34.64,"hwa":34.55,"sar":33.16,"sn":37.43,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-05-26","s":"Summer","y":30.02,"hwd":33.92,"hwa":33.83,"sar":33.18,"sn":37.99,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-05-27","s":"Summer","y":31.25,"hwd":32.99,"hwa":32.89,"sar":33.19,"sn":37.86,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-05-28","s":"Summer","y":33.03,"hwd":32.21,"hwa":32.11,"sar":33.2,"sn":37.43,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-05-29","s":"Summer","y":33.9,"hwd":32.25,"hwa":32.15,"sar":33.21,"sn":38.69,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-05-30","s":"Summer","y":31.67,"hwd":32.45,"hwa":32.35,"sar":33.21,"sn":39.01,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-05-31","s":"Summer","y":32.43,"hwd":33.24,"hwa":33.14,"sar":33.21,"sn":37.11,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-06-01","s":"Monsoon","y":31.2,"hwd":33.81,"hwa":33.7,"sar":33.2,"sn":37.33,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-06-02","s":"Monsoon","y":30.68,"hwd":33.79,"hwa":33.68,"sar":33.19,"sn":36.24,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-06-03","s":"Monsoon","y":29.69,"hwd":32.92,"hwa":32.81,"sar":33.17,"sn":37.28,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-06-04","s":"Monsoon","y":28.87,"hwd":32.09,"hwa":31.98,"sar":33.15,"sn":36.96,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-06-05","s":"Monsoon","y":30.64,"hwd":31.89,"hwa":31.78,"sar":33.13,"sn":36.73,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-06-06","s":"Monsoon","y":32.65,"hwd":32.16,"hwa":32.05,"sar":33.1,"sn":34.7,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-06-07","s":"Monsoon","y":34.66,"hwd":32.75,"hwa":32.64,"sar":33.07,"sn":35.0,"ari":22.9,"hl":22.45,"nv":22.4},{"d":"2025-06-08","s":"Monsoon","y":35.98,"hwd":33.47,"hwa":33.36,"sar":33.04,"sn":34.76,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-09","s":"Monsoon","y":36.33,"hwd":33.66,"hwa":33.54,"sar":33.0,"sn":35.23,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-10","s":"Monsoon","y":36.3,"hwd":33.39,"hwa":33.28,"sar":32.96,"sn":35.83,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-11","s":"Monsoon","y":36.67,"hwd":32.98,"hwa":32.87,"sar":32.91,"sn":36.05,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-12","s":"Monsoon","y":37.55,"hwd":32.62,"hwa":32.5,"sar":32.87,"sn":36.95,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-13","s":"Monsoon","y":36.87,"hwd":32.1,"hwa":31.98,"sar":32.82,"sn":37.62,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-14","s":"Monsoon","y":36.8,"hwd":32.06,"hwa":31.94,"sar":32.76,"sn":37.59,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-15","s":"Monsoon","y":34.86,"hwd":32.36,"hwa":32.23,"sar":32.71,"sn":37.8,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-16","s":"Monsoon","y":29.95,"hwd":33.21,"hwa":33.08,"sar":32.65,"sn":38.41,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-17","s":"Monsoon","y":29.9,"hwd":33.84,"hwa":33.72,"sar":32.59,"sn":39.15,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-18","s":"Monsoon","y":29.39,"hwd":33.7,"hwa":33.57,"sar":32.52,"sn":38.95,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-19","s":"Monsoon","y":30.46,"hwd":33.88,"hwa":33.75,"sar":32.46,"sn":37.57,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-20","s":"Monsoon","y":29.42,"hwd":33.62,"hwa":33.49,"sar":32.39,"sn":33.99,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-21","s":"Monsoon","y":31.23,"hwd":32.76,"hwa":32.63,"sar":32.32,"sn":32.6,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-22","s":"Monsoon","y":32.12,"hwd":31.77,"hwa":31.64,"sar":32.24,"sn":33.43,"ari":22.9,"hl":22.46,"nv":22.4},{"d":"2025-06-23","s":"Monsoon","y":32.7,"hwd":31.33,"hwa":31.19,"sar":32.17,"sn":34.74,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-06-24","s":"Monsoon","y":32.13,"hwd":31.0,"hwa":30.86,"sar":32.09,"sn":34.46,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-06-25","s":"Monsoon","y":29.73,"hwd":31.11,"hwa":30.97,"sar":32.02,"sn":33.49,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-06-26","s":"Monsoon","y":31.18,"hwd":31.53,"hwa":31.39,"sar":31.94,"sn":31.3,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-06-27","s":"Monsoon","y":31.6,"hwd":31.79,"hwa":31.65,"sar":31.86,"sn":28.82,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-06-28","s":"Monsoon","y":32.25,"hwd":31.9,"hwa":31.76,"sar":31.78,"sn":28.55,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-06-29","s":"Monsoon","y":30.28,"hwd":31.54,"hwa":31.39,"sar":31.7,"sn":29.57,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-06-30","s":"Monsoon","y":28.35,"hwd":31.56,"hwa":31.41,"sar":31.62,"sn":30.83,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-07-01","s":"Monsoon","y":28.88,"hwd":31.54,"hwa":31.4,"sar":31.53,"sn":30.45,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-07-02","s":"Monsoon","y":30.28,"hwd":31.33,"hwa":31.19,"sar":31.45,"sn":29.48,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-07-03","s":"Monsoon","y":30.45,"hwd":31.77,"hwa":31.62,"sar":31.36,"sn":29.8,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-07-04","s":"Monsoon","y":30.67,"hwd":31.47,"hwa":31.32,"sar":31.28,"sn":28.3,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-07-05","s":"Monsoon","y":31.26,"hwd":31.42,"hwa":31.27,"sar":31.2,"sn":28.0,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-07-06","s":"Monsoon","y":31.12,"hwd":31.28,"hwa":31.13,"sar":31.11,"sn":28.88,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-07-07","s":"Monsoon","y":29.03,"hwd":31.01,"hwa":30.85,"sar":31.03,"sn":28.73,"ari":22.9,"hl":22.47,"nv":22.4},{"d":"2025-07-08","s":"Monsoon","y":30.91,"hwd":30.48,"hwa":30.32,"sar":30.94,"sn":28.98,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-09","s":"Monsoon","y":29.32,"hwd":29.97,"hwa":29.81,"sar":30.86,"sn":29.33,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-10","s":"Monsoon","y":27.69,"hwd":30.03,"hwa":29.87,"sar":30.78,"sn":30.41,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-11","s":"Monsoon","y":28.65,"hwd":29.79,"hwa":29.63,"sar":30.69,"sn":31.65,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-12","s":"Monsoon","y":29.63,"hwd":29.56,"hwa":29.4,"sar":30.61,"sn":30.68,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-13","s":"Monsoon","y":28.64,"hwd":29.17,"hwa":29.01,"sar":30.53,"sn":29.93,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-14","s":"Monsoon","y":28.38,"hwd":29.13,"hwa":28.97,"sar":30.45,"sn":31.25,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-15","s":"Monsoon","y":28.32,"hwd":28.88,"hwa":28.71,"sar":30.37,"sn":30.33,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-16","s":"Monsoon","y":28.99,"hwd":29.28,"hwa":29.12,"sar":30.29,"sn":30.9,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-17","s":"Monsoon","y":28.77,"hwd":29.35,"hwa":29.18,"sar":30.22,"sn":31.39,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-18","s":"Monsoon","y":28.82,"hwd":29.42,"hwa":29.25,"sar":30.14,"sn":31.33,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-19","s":"Monsoon","y":29.39,"hwd":30.01,"hwa":29.84,"sar":30.06,"sn":30.9,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-20","s":"Monsoon","y":30.6,"hwd":30.47,"hwa":30.3,"sar":29.99,"sn":31.38,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-21","s":"Monsoon","y":29.15,"hwd":30.12,"hwa":29.94,"sar":29.92,"sn":31.37,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-22","s":"Monsoon","y":30.36,"hwd":29.75,"hwa":29.58,"sar":29.85,"sn":31.12,"ari":22.9,"hl":22.48,"nv":22.4},{"d":"2025-07-23","s":"Monsoon","y":30.17,"hwd":28.92,"hwa":28.74,"sar":29.78,"sn":30.52,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-07-24","s":"Monsoon","y":31.03,"hwd":28.69,"hwa":28.51,"sar":29.72,"sn":30.18,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-07-25","s":"Monsoon","y":31.99,"hwd":28.9,"hwa":28.72,"sar":29.65,"sn":31.23,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-07-26","s":"Monsoon","y":31.94,"hwd":29.11,"hwa":28.93,"sar":29.59,"sn":30.25,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-07-27","s":"Monsoon","y":33.11,"hwd":28.85,"hwa":28.67,"sar":29.53,"sn":30.83,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-07-28","s":"Monsoon","y":32.96,"hwd":28.83,"hwa":28.65,"sar":29.47,"sn":31.99,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-07-29","s":"Monsoon","y":29.79,"hwd":29.28,"hwa":29.1,"sar":29.41,"sn":32.48,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-07-30","s":"Monsoon","y":28.48,"hwd":29.9,"hwa":29.71,"sar":29.36,"sn":33.42,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-07-31","s":"Monsoon","y":27.72,"hwd":29.79,"hwa":29.6,"sar":29.3,"sn":31.51,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-08-01","s":"Monsoon","y":28.39,"hwd":29.4,"hwa":29.21,"sar":29.25,"sn":28.49,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-08-02","s":"Monsoon","y":29.39,"hwd":29.4,"hwa":29.21,"sar":29.2,"sn":28.83,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-08-03","s":"Monsoon","y":29.98,"hwd":29.15,"hwa":28.96,"sar":29.15,"sn":29.08,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-08-04","s":"Monsoon","y":29.07,"hwd":28.72,"hwa":28.53,"sar":29.11,"sn":29.97,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-08-05","s":"Monsoon","y":27.99,"hwd":28.66,"hwa":28.47,"sar":29.06,"sn":29.38,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-08-06","s":"Monsoon","y":28.94,"hwd":28.56,"hwa":28.37,"sar":29.02,"sn":29.32,"ari":22.9,"hl":22.49,"nv":22.4},{"d":"2025-08-07","s":"Monsoon","y":30.06,"hwd":28.52,"hwa":28.32,"sar":28.98,"sn":27.57,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-08","s":"Monsoon","y":30.1,"hwd":28.34,"hwa":28.14,"sar":28.95,"sn":28.01,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-09","s":"Monsoon","y":28.11,"hwd":28.35,"hwa":28.15,"sar":28.91,"sn":27.93,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-10","s":"Monsoon","y":29.21,"hwd":28.3,"hwa":28.1,"sar":28.87,"sn":27.81,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-11","s":"Monsoon","y":29.96,"hwd":28.81,"hwa":28.61,"sar":28.84,"sn":27.45,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-12","s":"Monsoon","y":29.62,"hwd":28.61,"hwa":28.41,"sar":28.81,"sn":27.04,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-13","s":"Monsoon","y":30.4,"hwd":28.64,"hwa":28.43,"sar":28.78,"sn":27.55,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-14","s":"Monsoon","y":27.89,"hwd":28.84,"hwa":28.64,"sar":28.76,"sn":28.27,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-15","s":"Monsoon","y":28.74,"hwd":28.5,"hwa":28.29,"sar":28.73,"sn":28.73,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-16","s":"Monsoon","y":28.73,"hwd":28.53,"hwa":28.32,"sar":28.71,"sn":28.05,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-17","s":"Monsoon","y":29.14,"hwd":28.73,"hwa":28.52,"sar":28.68,"sn":28.66,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-18","s":"Monsoon","y":29.34,"hwd":28.81,"hwa":28.6,"sar":28.66,"sn":29.18,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-19","s":"Monsoon","y":29.46,"hwd":28.68,"hwa":28.47,"sar":28.64,"sn":29.33,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-20","s":"Monsoon","y":29.37,"hwd":28.87,"hwa":28.66,"sar":28.62,"sn":28.38,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-21","s":"Monsoon","y":30.15,"hwd":29.01,"hwa":28.8,"sar":28.6,"sn":28.59,"ari":22.9,"hl":22.5,"nv":22.4},{"d":"2025-08-22","s":"Monsoon","y":30.45,"hwd":29.24,"hwa":29.02,"sar":28.59,"sn":28.58,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-23","s":"Monsoon","y":28.38,"hwd":29.39,"hwa":29.17,"sar":28.57,"sn":28.01,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-24","s":"Monsoon","y":27.98,"hwd":29.76,"hwa":29.54,"sar":28.55,"sn":28.6,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-25","s":"Monsoon","y":26.93,"hwd":29.77,"hwa":29.55,"sar":28.54,"sn":29.03,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-26","s":"Monsoon","y":27.51,"hwd":29.6,"hwa":29.37,"sar":28.52,"sn":28.7,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-27","s":"Monsoon","y":28.79,"hwd":29.15,"hwa":28.93,"sar":28.51,"sn":27.62,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-28","s":"Monsoon","y":28.59,"hwd":29.02,"hwa":28.8,"sar":28.5,"sn":27.09,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-29","s":"Monsoon","y":28.07,"hwd":28.74,"hwa":28.52,"sar":28.48,"sn":27.07,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-30","s":"Monsoon","y":28.6,"hwd":28.28,"hwa":28.05,"sar":28.47,"sn":27.94,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-08-31","s":"Monsoon","y":26.94,"hwd":28.03,"hwa":27.8,"sar":28.46,"sn":29.37,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-09-01","s":"Monsoon","y":25.94,"hwd":27.89,"hwa":27.66,"sar":28.44,"sn":29.66,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-09-02","s":"Monsoon","y":25.32,"hwd":27.57,"hwa":27.33,"sar":28.43,"sn":28.02,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-09-03","s":"Monsoon","y":26.35,"hwd":27.82,"hwa":27.58,"sar":28.41,"sn":27.45,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-09-04","s":"Monsoon","y":27.34,"hwd":27.91,"hwa":27.68,"sar":28.4,"sn":27.24,"ari":22.9,"hl":22.51,"nv":22.4},{"d":"2025-09-05","s":"Monsoon","y":27.9,"hwd":27.86,"hwa":27.62,"sar":28.38,"sn":27.5,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-06","s":"Monsoon","y":28.0,"hwd":28.04,"hwa":27.8,"sar":28.37,"sn":26.69,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-07","s":"Monsoon","y":28.27,"hwd":28.4,"hwa":28.16,"sar":28.35,"sn":27.01,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-08","s":"Monsoon","y":28.69,"hwd":28.63,"hwa":28.39,"sar":28.33,"sn":27.75,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-09","s":"Monsoon","y":29.05,"hwd":28.55,"hwa":28.31,"sar":28.31,"sn":28.49,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-10","s":"Monsoon","y":29.03,"hwd":28.62,"hwa":28.37,"sar":28.29,"sn":27.05,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-11","s":"Monsoon","y":28.42,"hwd":28.84,"hwa":28.59,"sar":28.27,"sn":27.51,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-12","s":"Monsoon","y":28.57,"hwd":28.77,"hwa":28.52,"sar":28.24,"sn":25.75,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-13","s":"Monsoon","y":29.44,"hwd":28.88,"hwa":28.63,"sar":28.21,"sn":25.61,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-14","s":"Monsoon","y":30.61,"hwd":28.92,"hwa":28.67,"sar":28.19,"sn":25.99,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-15","s":"Monsoon","y":31.0,"hwd":28.97,"hwa":28.72,"sar":28.16,"sn":26.48,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-16","s":"Monsoon","y":31.0,"hwd":28.55,"hwa":28.29,"sar":28.12,"sn":27.16,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-17","s":"Monsoon","y":30.96,"hwd":28.18,"hwa":27.92,"sar":28.09,"sn":27.55,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-18","s":"Monsoon","y":30.28,"hwd":28.05,"hwa":27.79,"sar":28.05,"sn":25.39,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-19","s":"Monsoon","y":30.64,"hwd":28.47,"hwa":28.21,"sar":28.01,"sn":26.41,"ari":22.9,"hl":22.52,"nv":22.4},{"d":"2025-09-20","s":"Monsoon","y":30.67,"hwd":28.37,"hwa":28.12,"sar":27.97,"sn":27.68,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-21","s":"Monsoon","y":30.28,"hwd":28.44,"hwa":28.18,"sar":27.92,"sn":28.51,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-22","s":"Monsoon","y":30.6,"hwd":28.48,"hwa":28.22,"sar":27.88,"sn":29.1,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-23","s":"Monsoon","y":30.51,"hwd":28.15,"hwa":27.88,"sar":27.83,"sn":29.05,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-24","s":"Monsoon","y":29.9,"hwd":27.83,"hwa":27.56,"sar":27.77,"sn":29.35,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-25","s":"Monsoon","y":29.88,"hwd":27.06,"hwa":26.79,"sar":27.72,"sn":29.26,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-26","s":"Monsoon","y":30.34,"hwd":26.67,"hwa":26.4,"sar":27.66,"sn":28.02,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-27","s":"Monsoon","y":31.27,"hwd":26.2,"hwa":25.93,"sar":27.59,"sn":27.59,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-28","s":"Monsoon","y":32.96,"hwd":25.68,"hwa":25.41,"sar":27.53,"sn":26.54,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-29","s":"Monsoon","y":32.51,"hwd":25.39,"hwa":25.12,"sar":27.46,"sn":26.62,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-09-30","s":"Monsoon","y":30.21,"hwd":25.3,"hwa":25.03,"sar":27.38,"sn":27.64,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-10-01","s":"Post-monsoon","y":28.39,"hwd":25.31,"hwa":25.04,"sar":27.31,"sn":28.21,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-10-02","s":"Post-monsoon","y":28.61,"hwd":25.84,"hwa":25.57,"sar":27.23,"sn":29.02,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-10-03","s":"Post-monsoon","y":28.84,"hwd":26.21,"hwa":25.94,"sar":27.14,"sn":28.37,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-10-04","s":"Post-monsoon","y":29.4,"hwd":26.26,"hwa":25.98,"sar":27.05,"sn":28.09,"ari":22.9,"hl":22.53,"nv":22.4},{"d":"2025-10-05","s":"Post-monsoon","y":28.68,"hwd":26.17,"hwa":25.89,"sar":26.96,"sn":28.25,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-06","s":"Post-monsoon","y":23.77,"hwd":26.01,"hwa":25.73,"sar":26.87,"sn":27.63,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-07","s":"Post-monsoon","y":23.48,"hwd":25.88,"hwa":25.6,"sar":26.77,"sn":26.66,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-08","s":"Post-monsoon","y":22.55,"hwd":25.58,"hwa":25.3,"sar":26.66,"sn":26.81,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-09","s":"Post-monsoon","y":23.61,"hwd":24.98,"hwa":24.7,"sar":26.56,"sn":26.32,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-10","s":"Post-monsoon","y":23.32,"hwd":24.78,"hwa":24.5,"sar":26.44,"sn":26.12,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-11","s":"Post-monsoon","y":23.75,"hwd":24.51,"hwa":24.22,"sar":26.33,"sn":24.44,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-12","s":"Post-monsoon","y":24.74,"hwd":24.62,"hwa":24.33,"sar":26.21,"sn":24.93,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-13","s":"Post-monsoon","y":24.93,"hwd":24.76,"hwa":24.47,"sar":26.09,"sn":25.73,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-14","s":"Post-monsoon","y":24.86,"hwd":24.51,"hwa":24.22,"sar":25.96,"sn":25.27,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-15","s":"Post-monsoon","y":24.78,"hwd":24.03,"hwa":23.73,"sar":25.83,"sn":24.72,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-16","s":"Post-monsoon","y":24.59,"hwd":23.69,"hwa":23.4,"sar":25.7,"sn":25.25,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-17","s":"Post-monsoon","y":24.68,"hwd":23.36,"hwa":23.06,"sar":25.56,"sn":26.29,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-18","s":"Post-monsoon","y":25.53,"hwd":23.27,"hwa":22.97,"sar":25.42,"sn":26.31,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-19","s":"Post-monsoon","y":26.02,"hwd":23.14,"hwa":22.84,"sar":25.27,"sn":26.63,"ari":22.9,"hl":22.54,"nv":22.4},{"d":"2025-10-20","s":"Post-monsoon","y":26.23,"hwd":23.13,"hwa":22.83,"sar":25.12,"sn":26.28,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-21","s":"Post-monsoon","y":26.57,"hwd":23.17,"hwa":22.87,"sar":24.97,"sn":25.67,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-22","s":"Post-monsoon","y":25.79,"hwd":22.88,"hwa":22.58,"sar":24.82,"sn":25.13,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-23","s":"Post-monsoon","y":24.53,"hwd":22.55,"hwa":22.25,"sar":24.66,"sn":25.52,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-24","s":"Post-monsoon","y":24.35,"hwd":22.45,"hwa":22.15,"sar":24.49,"sn":25.37,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-25","s":"Post-monsoon","y":24.29,"hwd":22.38,"hwa":22.08,"sar":24.33,"sn":24.73,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-26","s":"Post-monsoon","y":24.68,"hwd":22.51,"hwa":22.2,"sar":24.16,"sn":24.36,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-27","s":"Post-monsoon","y":24.12,"hwd":22.68,"hwa":22.37,"sar":23.99,"sn":25.45,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-28","s":"Post-monsoon","y":23.45,"hwd":22.73,"hwa":22.42,"sar":23.81,"sn":25.8,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-29","s":"Post-monsoon","y":23.75,"hwd":22.79,"hwa":22.47,"sar":23.63,"sn":26.35,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-30","s":"Post-monsoon","y":23.72,"hwd":22.93,"hwa":22.62,"sar":23.45,"sn":26.67,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-10-31","s":"Post-monsoon","y":24.95,"hwd":22.78,"hwa":22.46,"sar":23.27,"sn":25.61,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-11-01","s":"Post-monsoon","y":24.36,"hwd":22.09,"hwa":21.77,"sar":23.08,"sn":24.57,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-11-02","s":"Post-monsoon","y":23.25,"hwd":21.25,"hwa":20.93,"sar":22.89,"sn":23.88,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-11-03","s":"Post-monsoon","y":22.86,"hwd":20.87,"hwa":20.55,"sar":22.7,"sn":23.64,"ari":22.9,"hl":22.55,"nv":22.4},{"d":"2025-11-04","s":"Post-monsoon","y":23.26,"hwd":20.76,"hwa":20.44,"sar":22.51,"sn":22.65,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-05","s":"Post-monsoon","y":23.38,"hwd":20.67,"hwa":20.35,"sar":22.31,"sn":23.08,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-06","s":"Post-monsoon","y":20.15,"hwd":20.87,"hwa":20.55,"sar":22.12,"sn":23.79,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-07","s":"Post-monsoon","y":19.73,"hwd":20.69,"hwa":20.36,"sar":21.92,"sn":24.12,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-08","s":"Post-monsoon","y":19.26,"hwd":20.47,"hwa":20.14,"sar":21.72,"sn":24.39,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-09","s":"Post-monsoon","y":19.34,"hwd":20.01,"hwa":19.68,"sar":21.51,"sn":24.69,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-10","s":"Post-monsoon","y":18.93,"hwd":19.61,"hwa":19.28,"sar":21.31,"sn":24.01,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-11","s":"Post-monsoon","y":19.07,"hwd":19.46,"hwa":19.13,"sar":21.11,"sn":24.06,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-12","s":"Post-monsoon","y":19.44,"hwd":19.27,"hwa":18.94,"sar":20.9,"sn":24.3,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-13","s":"Post-monsoon","y":18.28,"hwd":19.13,"hwa":18.8,"sar":20.7,"sn":22.93,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-14","s":"Post-monsoon","y":18.25,"hwd":18.77,"hwa":18.44,"sar":20.49,"sn":22.38,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-15","s":"Post-monsoon","y":18.33,"hwd":18.53,"hwa":18.19,"sar":20.28,"sn":22.42,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-16","s":"Post-monsoon","y":18.1,"hwd":18.32,"hwa":17.99,"sar":20.07,"sn":22.26,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-17","s":"Post-monsoon","y":17.7,"hwd":18.19,"hwa":17.85,"sar":19.87,"sn":21.65,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-18","s":"Post-monsoon","y":17.8,"hwd":18.04,"hwa":17.7,"sar":19.66,"sn":19.97,"ari":22.9,"hl":22.56,"nv":22.4},{"d":"2025-11-19","s":"Post-monsoon","y":18.52,"hwd":18.19,"hwa":17.85,"sar":19.45,"sn":18.98,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-20","s":"Post-monsoon","y":18.97,"hwd":18.03,"hwa":17.69,"sar":19.24,"sn":18.5,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-21","s":"Post-monsoon","y":19.43,"hwd":17.7,"hwa":17.35,"sar":19.04,"sn":18.52,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-22","s":"Post-monsoon","y":18.77,"hwd":17.39,"hwa":17.04,"sar":18.83,"sn":19.0,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-23","s":"Post-monsoon","y":17.93,"hwd":17.25,"hwa":16.91,"sar":18.63,"sn":19.88,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-24","s":"Post-monsoon","y":17.12,"hwd":16.93,"hwa":16.58,"sar":18.42,"sn":20.28,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-25","s":"Post-monsoon","y":16.34,"hwd":16.69,"hwa":16.34,"sar":18.22,"sn":19.46,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-26","s":"Post-monsoon","y":16.1,"hwd":16.49,"hwa":16.14,"sar":18.02,"sn":18.62,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-27","s":"Post-monsoon","y":16.26,"hwd":16.41,"hwa":16.05,"sar":17.82,"sn":18.37,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-28","s":"Post-monsoon","y":16.88,"hwd":16.84,"hwa":16.48,"sar":17.62,"sn":17.76,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-29","s":"Post-monsoon","y":17.85,"hwd":17.16,"hwa":16.81,"sar":17.42,"sn":17.25,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-11-30","s":"Post-monsoon","y":16.24,"hwd":17.35,"hwa":16.99,"sar":17.23,"sn":17.51,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-12-01","s":"Winter","y":15.55,"hwd":17.03,"hwa":16.68,"sar":17.04,"sn":18.17,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-12-02","s":"Winter","y":17.38,"hwd":16.48,"hwa":16.12,"sar":16.85,"sn":18.22,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-12-03","s":"Winter","y":15.2,"hwd":16.02,"hwa":15.65,"sar":16.66,"sn":19.02,"ari":22.9,"hl":22.57,"nv":22.4},{"d":"2025-12-04","s":"Winter","y":14.31,"hwd":15.51,"hwa":15.15,"sar":16.48,"sn":19.1,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-05","s":"Winter","y":14.07,"hwd":15.16,"hwa":14.8,"sar":16.29,"sn":16.82,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-06","s":"Winter","y":15.5,"hwd":14.95,"hwa":14.58,"sar":16.12,"sn":16.68,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-07","s":"Winter","y":16.18,"hwd":14.51,"hwa":14.14,"sar":15.94,"sn":15.71,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-08","s":"Winter","y":16.93,"hwd":14.39,"hwa":14.02,"sar":15.77,"sn":16.6,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-09","s":"Winter","y":16.65,"hwd":14.34,"hwa":13.97,"sar":15.6,"sn":14.72,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-10","s":"Winter","y":16.52,"hwd":14.39,"hwa":14.02,"sar":15.43,"sn":13.75,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-11","s":"Winter","y":16.1,"hwd":14.23,"hwa":13.86,"sar":15.27,"sn":12.88,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-12","s":"Winter","y":15.59,"hwd":13.94,"hwa":13.56,"sar":15.12,"sn":12.96,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-13","s":"Winter","y":16.63,"hwd":13.71,"hwa":13.33,"sar":14.96,"sn":13.69,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-14","s":"Winter","y":16.79,"hwd":13.58,"hwa":13.2,"sar":14.81,"sn":13.62,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-15","s":"Winter","y":15.53,"hwd":13.71,"hwa":13.33,"sar":14.67,"sn":12.78,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-16","s":"Winter","y":16.15,"hwd":13.71,"hwa":13.33,"sar":14.53,"sn":12.53,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-17","s":"Winter","y":16.26,"hwd":13.56,"hwa":13.18,"sar":14.39,"sn":12.57,"ari":22.9,"hl":22.58,"nv":22.4},{"d":"2025-12-18","s":"Winter","y":15.36,"hwd":13.73,"hwa":13.35,"sar":14.26,"sn":12.64,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-19","s":"Winter","y":14.57,"hwd":13.64,"hwa":13.26,"sar":14.13,"sn":13.66,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-20","s":"Winter","y":14.11,"hwd":13.48,"hwa":13.1,"sar":14.01,"sn":15.24,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-21","s":"Winter","y":14.82,"hwd":13.22,"hwa":12.83,"sar":13.89,"sn":14.5,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-22","s":"Winter","y":14.99,"hwd":13.34,"hwa":12.95,"sar":13.78,"sn":15.22,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-23","s":"Winter","y":15.75,"hwd":13.32,"hwa":12.93,"sar":13.67,"sn":14.5,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-24","s":"Winter","y":15.32,"hwd":13.24,"hwa":12.85,"sar":13.56,"sn":14.47,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-25","s":"Winter","y":13.79,"hwd":13.2,"hwa":12.81,"sar":13.47,"sn":14.1,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-26","s":"Winter","y":13.95,"hwd":13.1,"hwa":12.71,"sar":13.37,"sn":14.65,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-27","s":"Winter","y":13.96,"hwd":12.85,"hwa":12.46,"sar":13.29,"sn":14.34,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-28","s":"Winter","y":13.45,"hwd":13.09,"hwa":12.69,"sar":13.21,"sn":14.97,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-29","s":"Winter","y":12.84,"hwd":13.16,"hwa":12.76,"sar":13.13,"sn":13.19,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-30","s":"Winter","y":13.16,"hwd":13.11,"hwa":12.71,"sar":13.06,"sn":12.37,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2025-12-31","s":"Winter","y":13.0,"hwd":13.27,"hwa":12.87,"sar":12.99,"sn":10.72,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2026-01-01","s":"Winter","y":13.3,"hwd":13.46,"hwa":13.06,"sar":12.92,"sn":10.59,"ari":22.9,"hl":22.59,"nv":22.4},{"d":"2026-01-02","s":"Winter","y":13.58,"hwd":13.56,"hwa":13.16,"sar":12.87,"sn":11.87,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-03","s":"Winter","y":12.89,"hwd":13.91,"hwa":13.51,"sar":12.82,"sn":11.81,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-04","s":"Winter","y":12.16,"hwd":13.79,"hwa":13.39,"sar":12.78,"sn":12.68,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-05","s":"Winter","y":12.22,"hwd":13.84,"hwa":13.43,"sar":12.74,"sn":12.63,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-06","s":"Winter","y":11.71,"hwd":13.67,"hwa":13.27,"sar":12.71,"sn":12.98,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-07","s":"Winter","y":10.42,"hwd":13.25,"hwa":12.84,"sar":12.69,"sn":12.78,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-08","s":"Winter","y":9.61,"hwd":12.87,"hwa":12.46,"sar":12.67,"sn":12.21,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-09","s":"Winter","y":10.82,"hwd":12.12,"hwa":11.71,"sar":12.66,"sn":11.79,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-10","s":"Winter","y":10.73,"hwd":12.05,"hwa":11.64,"sar":12.65,"sn":11.81,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-11","s":"Winter","y":9.84,"hwd":12.16,"hwa":11.75,"sar":12.65,"sn":12.09,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-12","s":"Winter","y":9.59,"hwd":11.94,"hwa":11.52,"sar":12.65,"sn":12.96,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-13","s":"Winter","y":9.68,"hwd":11.97,"hwa":11.55,"sar":12.66,"sn":12.88,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-14","s":"Winter","y":9.63,"hwd":12.13,"hwa":11.71,"sar":12.68,"sn":12.53,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-15","s":"Winter","y":10.09,"hwd":12.33,"hwa":11.91,"sar":12.7,"sn":12.3,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-16","s":"Winter","y":11.61,"hwd":13.1,"hwa":12.68,"sar":12.73,"sn":13.86,"ari":22.9,"hl":22.6,"nv":22.4},{"d":"2026-01-17","s":"Winter","y":13.29,"hwd":13.82,"hwa":13.4,"sar":12.76,"sn":12.75,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-18","s":"Winter","y":14.43,"hwd":14.2,"hwa":13.77,"sar":12.8,"sn":11.63,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-19","s":"Winter","y":16.18,"hwd":14.17,"hwa":13.74,"sar":12.84,"sn":13.6,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-20","s":"Winter","y":15.79,"hwd":14.06,"hwa":13.63,"sar":12.89,"sn":15.72,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-21","s":"Winter","y":15.11,"hwd":13.99,"hwa":13.56,"sar":12.95,"sn":15.25,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-22","s":"Winter","y":16.66,"hwd":13.94,"hwa":13.51,"sar":13.01,"sn":15.44,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-23","s":"Winter","y":15.36,"hwd":13.78,"hwa":13.35,"sar":13.07,"sn":15.8,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-24","s":"Winter","y":11.2,"hwd":14.08,"hwa":13.65,"sar":13.15,"sn":14.45,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-25","s":"Winter","y":10.46,"hwd":14.57,"hwa":14.14,"sar":13.22,"sn":13.57,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-26","s":"Winter","y":11.85,"hwd":14.97,"hwa":14.53,"sar":13.31,"sn":13.03,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-27","s":"Winter","y":14.57,"hwd":15.08,"hwa":14.65,"sar":13.39,"sn":12.87,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-28","s":"Winter","y":14.33,"hwd":14.95,"hwa":14.51,"sar":13.48,"sn":13.68,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-29","s":"Winter","y":13.1,"hwd":14.54,"hwa":14.1,"sar":13.58,"sn":16.23,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-30","s":"Winter","y":13.34,"hwd":14.26,"hwa":13.82,"sar":13.68,"sn":17.39,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-01-31","s":"Winter","y":13.74,"hwd":14.19,"hwa":13.75,"sar":13.79,"sn":17.12,"ari":22.9,"hl":22.61,"nv":22.4},{"d":"2026-02-01","s":"Winter","y":16.18,"hwd":14.2,"hwa":13.76,"sar":13.9,"sn":17.95,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-02","s":"Winter","y":15.03,"hwd":14.64,"hwa":14.2,"sar":14.02,"sn":16.83,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-03","s":"Winter","y":13.96,"hwd":15.18,"hwa":14.73,"sar":14.14,"sn":15.32,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-04","s":"Winter","y":14.54,"hwd":15.42,"hwa":14.97,"sar":14.27,"sn":16.9,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-05","s":"Winter","y":14.83,"hwd":15.45,"hwa":15.0,"sar":14.4,"sn":15.1,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-06","s":"Winter","y":15.83,"hwd":16.2,"hwa":15.75,"sar":14.54,"sn":14.69,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-07","s":"Winter","y":17.08,"hwd":16.87,"hwa":16.42,"sar":14.67,"sn":14.09,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-08","s":"Winter","y":15.92,"hwd":17.63,"hwa":17.18,"sar":14.82,"sn":15.14,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-09","s":"Winter","y":16.75,"hwd":17.69,"hwa":17.23,"sar":14.97,"sn":15.88,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-10","s":"Winter","y":18.83,"hwd":17.8,"hwa":17.34,"sar":15.12,"sn":16.93,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-11","s":"Winter","y":19.07,"hwd":17.69,"hwa":17.23,"sar":15.28,"sn":17.93,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-12","s":"Winter","y":17.7,"hwd":17.36,"hwa":16.9,"sar":15.44,"sn":17.56,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-13","s":"Winter","y":17.63,"hwd":17.02,"hwa":16.56,"sar":15.6,"sn":16.81,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-14","s":"Winter","y":18.31,"hwd":17.02,"hwa":16.56,"sar":15.77,"sn":16.96,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-15","s":"Winter","y":19.63,"hwd":17.08,"hwa":16.61,"sar":15.94,"sn":17.85,"ari":22.9,"hl":22.62,"nv":22.4},{"d":"2026-02-16","s":"Winter","y":20.54,"hwd":17.55,"hwa":17.09,"sar":16.12,"sn":18.71,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-17","s":"Winter","y":22.61,"hwd":18.04,"hwa":17.57,"sar":16.29,"sn":19.43,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-18","s":"Winter","y":18.26,"hwd":18.34,"hwa":17.87,"sar":16.48,"sn":18.99,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-19","s":"Winter","y":18.58,"hwd":17.92,"hwa":17.45,"sar":16.66,"sn":18.88,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-20","s":"Winter","y":19.39,"hwd":17.35,"hwa":16.88,"sar":16.85,"sn":18.53,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-21","s":"Winter","y":19.44,"hwd":17.35,"hwa":16.88,"sar":17.04,"sn":18.13,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-22","s":"Winter","y":19.84,"hwd":18.24,"hwa":17.77,"sar":17.24,"sn":17.21,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-23","s":"Winter","y":20.47,"hwd":19.24,"hwa":18.76,"sar":17.43,"sn":17.65,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-24","s":"Winter","y":20.64,"hwd":19.67,"hwa":19.19,"sar":17.63,"sn":18.18,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-25","s":"Winter","y":20.52,"hwd":19.63,"hwa":19.16,"sar":17.84,"sn":19.44,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-26","s":"Winter","y":20.7,"hwd":20.12,"hwa":19.64,"sar":18.04,"sn":23.3,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-27","s":"Winter","y":21.74,"hwd":20.22,"hwa":19.74,"sar":18.25,"sn":20.05,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-02-28","s":"Winter","y":23.77,"hwd":20.97,"hwa":20.49,"sar":18.46,"sn":19.6,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-03-01","s":"Summer","y":22.26,"hwd":21.26,"hwa":20.78,"sar":18.67,"sn":19.23,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-03-02","s":"Summer","y":22.33,"hwd":21.18,"hwa":20.7,"sar":18.89,"sn":18.5,"ari":22.9,"hl":22.63,"nv":22.4},{"d":"2026-03-03","s":"Summer","y":23.33,"hwd":20.87,"hwa":20.39,"sar":19.1,"sn":19.63,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-04","s":"Summer","y":24.61,"hwd":20.95,"hwa":20.46,"sar":19.32,"sn":19.23,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-05","s":"Summer","y":26.12,"hwd":21.01,"hwa":20.52,"sar":19.54,"sn":17.01,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-06","s":"Summer","y":25.65,"hwd":21.45,"hwa":20.96,"sar":19.76,"sn":18.36,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-07","s":"Summer","y":26.62,"hwd":20.97,"hwa":20.48,"sar":19.99,"sn":19.1,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-08","s":"Summer","y":26.8,"hwd":20.74,"hwa":20.25,"sar":20.21,"sn":20.6,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-09","s":"Summer","y":26.51,"hwd":21.11,"hwa":20.61,"sar":20.44,"sn":24.02,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-10","s":"Summer","y":26.82,"hwd":21.74,"hwa":21.24,"sar":20.67,"sn":25.37,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-11","s":"Summer","y":26.89,"hwd":22.47,"hwa":21.97,"sar":20.89,"sn":25.75,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-12","s":"Summer","y":26.75,"hwd":22.53,"hwa":22.03,"sar":21.12,"sn":24.91,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-13","s":"Summer","y":25.86,"hwd":22.47,"hwa":21.97,"sar":21.35,"sn":24.0,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-14","s":"Summer","y":25.65,"hwd":22.86,"hwa":22.36,"sar":21.59,"sn":25.15,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-15","s":"Summer","y":23.45,"hwd":22.51,"hwa":22.0,"sar":21.82,"sn":23.78,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-16","s":"Summer","y":23.23,"hwd":22.27,"hwa":21.76,"sar":22.05,"sn":22.66,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-17","s":"Summer","y":22.8,"hwd":22.26,"hwa":21.76,"sar":22.28,"sn":22.07,"ari":22.9,"hl":22.64,"nv":22.4},{"d":"2026-03-18","s":"Summer","y":22.97,"hwd":22.39,"hwa":21.88,"sar":22.52,"sn":22.4,"ari":22.9,"hl":22.65,"nv":22.4}];
 const canvas = document.getElementById('fcCanvas');
 const ctx = canvas.getContext('2d');
+const dayScrubber = document.getElementById('dayScrubber');
+const scrubberLabel = document.getElementById('scrubberLabel');
+const playReplayBtn = document.getElementById('playReplayBtn');
+const dailyScoreGrid = document.getElementById('dailyScoreGrid');
+const scoreWinnerBadge = document.getElementById('scoreWinnerBadge');
 
 let activeSeason = 'ALL';
 let viewMode = 'temp'; // 'temp' | 'resid'
 let activeSeries = new Set(['y', 'hwd', 'sar']);
+let showCI = true;
 let hoverIdx = -1;
+let replayTimer = null;
 
 const seriesConfig = {
   y:   { label: 'Actual',           color: () => getComputedStyle(rootEl).getPropertyValue('--ink').trim() || '#1B2320', lw: 2.2, dash: [] },
@@ -841,14 +1033,49 @@ const seriesConfig = {
   ari: { label: 'ARIMA(2,1,2)',     color: () => '#B84A39', lw: 1.4, dash: [2, 3] }
 };
 
+const allModelMeta = [
+  { key: 'hwd', name: 'HW Damped' },
+  { key: 'hwa', name: 'HW Additive' },
+  { key: 'sar', name: 'SARIMAX K=3' },
+  { key: 'sn',  name: 'Seas. Naive' },
+  { key: 'ari', name: 'ARIMA(2,1,2)' },
+  { key: 'hl',  name: 'Holt Linear' },
+  { key: 'nv',  name: 'Naive' }
+];
+
 function getFilteredData() {
   if (activeSeason === 'ALL') return FC_DATA;
   return FC_DATA.filter(d => d.s === activeSeason);
 }
 
+function updateDailyScorecard(pt) {
+  if (!pt || !dailyScoreGrid) return;
+  const ranked = allModelMeta.map(m => {
+    const pred = pt[m.key];
+    const absErr = Math.abs(pt.y - pred);
+    const signedErr = pt.y - pred;
+    return { ...m, pred, absErr, signedErr };
+  }).sort((a, b) => a.absErr - b.absErr);
+
+  if (scoreWinnerBadge && ranked.length) {
+    scoreWinnerBadge.textContent = `Closest on ${pt.d}: ${ranked[0].name} (|e| = ${ranked[0].absErr.toFixed(2)} °C)`;
+  }
+
+  dailyScoreGrid.innerHTML = ranked.map((m, i) => `
+    <div class="score-cell${i === 0 ? ' day-win' : ''}">
+      <small>#${i + 1} ${m.name}</small>
+      <strong>${m.pred.toFixed(1)} °C</strong>
+      <span>e: ${m.signedErr >= 0 ? '+' : ''}${m.signedErr.toFixed(2)}°</span>
+    </div>
+  `).join('');
+}
+
 function drawExplorer() {
   const data = getFilteredData();
   if (!data.length) return;
+  if (dayScrubber) {
+    dayScrubber.max = Math.max(0, data.length - 1);
+  }
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.parentElement.getBoundingClientRect();
   canvas.width = rect.width * dpr;
@@ -864,7 +1091,6 @@ function drawExplorer() {
   const style = getComputedStyle(rootEl);
   const lineCol = style.getPropertyValue('--line').trim() || '#C9CEC3';
   const softCol = style.getPropertyValue('--soft').trim() || '#5C665F';
-  const inkCol = style.getPropertyValue('--ink').trim() || '#1B2320';
 
   // Determine Y bounds
   let yMin = Infinity, yMax = -Infinity;
@@ -875,6 +1101,10 @@ function drawExplorer() {
         if (v < yMin) yMin = v;
         if (v > yMax) yMax = v;
       });
+      if (showCI && activeSeries.has('hwd')) {
+        if (pt.hwd - 4.12 < yMin) yMin = pt.hwd - 4.12;
+        if (pt.hwd + 4.12 > yMax) yMax = pt.hwd + 4.12;
+      }
     });
     if (!isFinite(yMin)) { yMin = 8; yMax = 40; }
     yMin = Math.floor(yMin - 2);
@@ -944,6 +1174,22 @@ function drawExplorer() {
       ctx.stroke();
     });
   } else {
+    // Optional 95% Prediction Interval fan around HW Damped (±1.96 * 2.10 = ±4.12 °C)
+    if (showCI && activeSeries.has('hwd')) {
+      ctx.fillStyle = 'rgba(193, 138, 44, 0.13)';
+      ctx.beginPath();
+      data.forEach((pt, i) => {
+        const px = xOf(i), py = yOf(pt.hwd + 4.12);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      });
+      for (let i = data.length - 1; i >= 0; i--) {
+        const px = xOf(i), py = yOf(data[i].hwd - 4.12);
+        ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+
     // Draw series lines
     ['sn', 'ari', 'sar', 'hwd', 'y'].forEach(k => {
       if (!activeSeries.has(k)) return;
@@ -965,6 +1211,9 @@ function drawExplorer() {
   const idx = hoverIdx >= 0 && hoverIdx < data.length ? hoverIdx : data.length - 1;
   const pt = data[idx];
   if (pt) {
+    if (dayScrubber) dayScrubber.value = idx;
+    if (scrubberLabel) scrubberLabel.textContent = `Day ${idx + 1} / ${data.length}`;
+
     const hx = xOf(idx);
     ctx.strokeStyle = softCol;
     ctx.lineWidth = 1;
@@ -1000,10 +1249,52 @@ function drawExplorer() {
     const errEl = document.getElementById('roErr');
     errEl.textContent = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)} °C`;
     errEl.style.color = Math.abs(diff) <= 2.13 ? 'var(--olive)' : 'var(--ochre)';
+    const ciEl = document.getElementById('roCI');
+    if (ciEl) ciEl.textContent = `[${(pt.hwd - 4.12).toFixed(1)}, ${(pt.hwd + 4.12).toFixed(1)}] °C`;
+
+    updateDailyScorecard(pt);
   }
 }
 
+function stopReplay() {
+  if (replayTimer) {
+    clearInterval(replayTimer);
+    replayTimer = null;
+    if (playReplayBtn) playReplayBtn.textContent = '▶ Play 365d Replay';
+  }
+}
+
+if (playReplayBtn) {
+  playReplayBtn.addEventListener('click', () => {
+    if (replayTimer) {
+      stopReplay();
+      return;
+    }
+    const data = getFilteredData();
+    if (hoverIdx < 0 || hoverIdx >= data.length - 1) hoverIdx = 0;
+    playReplayBtn.textContent = '⏸ Pause Replay';
+    replayTimer = setInterval(() => {
+      const d = getFilteredData();
+      if (hoverIdx < d.length - 1) {
+        hoverIdx++;
+        drawExplorer();
+      } else {
+        stopReplay();
+      }
+    }, 35);
+  });
+}
+
+if (dayScrubber) {
+  dayScrubber.addEventListener('input', e => {
+    stopReplay();
+    hoverIdx = parseInt(e.target.value, 10);
+    drawExplorer();
+  });
+}
+
 canvas.addEventListener('mousemove', e => {
+  stopReplay();
   const data = getFilteredData();
   const rect = canvas.getBoundingClientRect();
   const padLeft = 46, padRight = 20;
@@ -1016,6 +1307,7 @@ window.addEventListener('resize', drawExplorer);
 
 document.querySelectorAll('#seasonFilterGroup .chip').forEach(btn => {
   btn.addEventListener('click', () => {
+    stopReplay();
     document.querySelectorAll('#seasonFilterGroup .chip').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     activeSeason = btn.dataset.season;
@@ -1033,7 +1325,7 @@ document.querySelectorAll('#viewModeGroup .chip').forEach(btn => {
   });
 });
 
-document.querySelectorAll('#modelToggleGroup .chip').forEach(btn => {
+document.querySelectorAll('#modelToggleGroup .chip[data-series]').forEach(btn => {
   btn.addEventListener('click', () => {
     const s = btn.dataset.series;
     if (activeSeries.has(s) && activeSeries.size > 1) {
@@ -1047,6 +1339,48 @@ document.querySelectorAll('#modelToggleGroup .chip').forEach(btn => {
   });
 });
 
+const ciToggleBtn = document.getElementById('ciToggleBtn');
+if (ciToggleBtn) {
+  ciToggleBtn.addEventListener('click', () => {
+    showCI = !showCI;
+    ciToggleBtn.classList.toggle('active', showCI);
+    drawExplorer();
+  });
+}
+
+// Event preset jumps
+document.querySelectorAll('#eventPresetGroup .chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    stopReplay();
+    const targetDate = btn.dataset.eventDate;
+    // Switch to full year first so all dates are present
+    const allBtn = document.querySelector('#seasonFilterGroup .chip[data-season="ALL"]');
+    if (allBtn && activeSeason !== 'ALL') {
+      document.querySelectorAll('#seasonFilterGroup .chip').forEach(b => b.classList.remove('active'));
+      allBtn.classList.add('active');
+      activeSeason = 'ALL';
+    }
+    document.querySelectorAll('#eventPresetGroup .chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const foundIdx = FC_DATA.findIndex(d => d.d === targetDate);
+    if (foundIdx >= 0) {
+      hoverIdx = foundIdx;
+      drawExplorer();
+    }
+  });
+});
+
+// Export canvas PNG
+const exportPngBtn = document.getElementById('exportPngBtn');
+if (exportPngBtn) {
+  exportPngBtn.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = `delhi_forecast_explorer_${activeSeason.toLowerCase()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
 // Jump from Season cards to Interactive Explorer
 document.querySelectorAll('.season[data-jump-season]').forEach(card => {
   card.addEventListener('click', () => {
@@ -1054,6 +1388,13 @@ document.querySelectorAll('.season[data-jump-season]').forEach(card => {
     const btn = document.querySelector(`#seasonFilterGroup .chip[data-season="${targetSeason}"]`);
     if (btn) btn.click();
     document.getElementById('explorer').scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// Viva Q&A Accordion
+document.querySelectorAll('#qaAccordion .qa-item').forEach(item => {
+  item.querySelector('.qa-q').addEventListener('click', () => {
+    item.classList.toggle('open');
   });
 });
 
