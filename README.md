@@ -96,6 +96,29 @@ To ensure a 100% fair comparison across forecasting horizons, models are explici
 
 ---
 
+## 🔭 Multi-Year Future Forecast Lab (Experimental: 1 April 2026 – 31 March 2030)
+
+> ⚠️ **EXPERIMENTAL LONG-RANGE FORECAST — NOT AN OPERATIONAL WEATHER FORECAST.**
+> We strictly distinguish between **(A) Historical 365-Day Out-of-Sample Evaluation (`19 March 2025 – 18 March 2026`)**, where true ground-truth observations exist and RMSE/MAE/MAPE/$R^2$ are evaluated, and **(B) Experimental Four-Year Future Forecasting (`1 April 2026 – 31 March 2030`)**, where no future observations exist and inter-model differences represent **model disagreement** rather than prediction error.
+
+- **Why the Module Was Added**: To explore how classical state-space models and gradient-boosted tree architectures extrapolate across a continuous multi-year future horizon (`1,461` daily predictions, including the `2028-02-29` leap day).
+- **Historical Training Period & Bridge Gap**:
+  - Historical training range: `1 January 1996 – 18 March 2026` (`11,035` daily observations; raw hourly dataset of `264,840` records had `0.59%` missingness, reconciled to `0.00%` daily missingness via post-split causal forward-fill `.ffill()`).
+  - Intermediate bridge window: `19 March 2026 – 31 March 2026` (`13` daily observations generated causally so the requested window starts cleanly on `1 April 2026`).
+  - Target future forecast window: `1 April 2026 – 31 March 2030` (`1,461` daily predictions across 48 months).
+- **Three Selectable Forecasting Models (`future_forecast_lab.py`)**:
+  1. **`Holt-Winters Damped`**: Trained on all `11,035` historical days up to `18 March 2026` ($m=365, \phi=0.9891$), preserving level, gradual damped trend, and 365 seasonal states across `1,474` steps.
+  2. **`XGBoost Recursive`**: Retrained on all `10,670` post-warmup historical rows using all **25 causal features**; feeds each predicted $\hat{y}_t$ into next-day lags (`1, 2, 3, 7, 14, 30, 365`), shifted rolling means/stds (`7, 14, 30d`), momentum, and anomaly features, while substituting historical DOY climatological expectations (`1996–2026`) for unavailable future DTR, humidity, and rainfall.
+  3. **`XGBoost Direct Seasonal`**: Retrained using the 8 seasonal/calendar/climatology/lag-365 features (`month, dayofyear, sin_doy_1, cos_doy_1, sin_doy_2, cos_doy_2, clim_doy_mean, lag_365`), avoiding short-term recursive lag feedback while remaining anchored to historical seasonal cycles.
+- **Exported Deliverables (`phase3_output/future_forecast/`)**:
+  - [`phase3_output/future_forecast/future_daily_all_models.csv`](phase3_output/future_forecast/future_daily_all_models.csv) (`4,383` rows = `1,461` days $\times$ 3 models)
+  - [`phase3_output/future_forecast/future_daily_holt_winters_damped.csv`](phase3_output/future_forecast/future_daily_holt_winters_damped.csv), [`future_daily_xgboost_recursive.csv`](phase3_output/future_forecast/future_daily_xgboost_recursive.csv), [`future_daily_xgboost_direct_seasonal.csv`](phase3_output/future_forecast/future_daily_xgboost_direct_seasonal.csv)
+  - [`phase3_output/future_forecast/future_monthly_summary.csv`](phase3_output/future_forecast/future_monthly_summary.csv) (`48` months per model)
+  - [`phase3_output/future_forecast/future_yearly_summary.csv`](phase3_output/future_forecast/future_yearly_summary.csv) (`2026` partial 275d, `2027` 365d, `2028` leap year 366d, `2029` 365d, `2030` partial 90d)
+  - [`phase3_output/future_forecast/future_seasonal_summary.csv`](phase3_output/future_forecast/future_seasonal_summary.csv) & [`future_model_disagreement.csv`](phase3_output/future_forecast/future_model_disagreement.csv)
+
+---
+
 ## 🚀 Quick Start & Execution Guide
 
 ```bash
@@ -110,4 +133,10 @@ python3 milestone2_pipeline.py --headless
 
 # 4. Run Phase 3 (XGBoost Feature Engineering, TimeSeriesSplit Tuning, IEEE Report & Viva PPTX)
 python3 phase3_xgboost.py --headless
+
+# 5. Generate Multi-Year Future Forecast Lab Outputs (1 April 2026 – 31 March 2030)
+python3 future_forecast_lab.py
+
+# 6. Launch Interactive Web Dashboard & Future Forecast Lab REST API Server on http://localhost:8000/
+python3 server.py
 ```

@@ -78,9 +78,9 @@ Using 5-fold expanding-window `TimeSeriesSplit(n_splits=5, test_size=365)` stric
 ---
 
 ## VI. Conclusion, Limitations, and Future Work
-- **Key Conclusion**: Tuned XGBoost achieves `1.111 °C` RMSE ($R^2 = 0.9744$), cutting Phase 2's best classical error (`2.129 °C`) by `47.8%`.
-- **Limitations**: 1-day reactive lag during unannounced convective dust storms (*Andhi*) and Western Disturbances; reliance on short-term lag observations compared to state-space multi-month extrapolation.
-- **Future Work**: Hybrid Holt-Winters + XGBoost residual stacking, ERA5 upper-air synoptic covariates, and quantile uncertainty intervals.
+- **Key Conclusion**: Tuned `XGBoost Rolling One-Step` achieves `1.111 °C` RMSE ($R^2 = 0.9744$), beating Rolling 1-Step SARIMAX (`1.177 °C`), while `Holt-Winters Damped` (`2.129 °C`) and `XGBoost Direct Seasonal` (`2.305 °C`) lead the Fixed 365-Day Multi-Step horizon.
+- **Six Project Limitations**: (1) Single-city geographical scope (Delhi); (2) Long-term 365-day forecasting uncertainty; (3) Limited external synoptic/upper-air weather telemetry (0.59% raw hourly missingness reconciled to 0.00% daily missingness after post-split causal `.ffill()`); (4) Recursive error accumulation (`3.388 °C` in 365-step recursive rollout); (5) Seasonal performance differences (Summer RMSE `1.41 °C` XGBoost / `2.50 °C` HW Damped vs. Post-monsoon `0.92 °C` / `1.70 °C`); and (6) Changing historical urban warming patterns.
+- **Future Work & Potential Applications**: Hybrid Holt-Winters + XGBoost residual stacking, multi-city ERA5 upper-air covariates, and quantile prediction intervals. Temperature forecasts may provide supporting information for power-grid planning, heat-risk awareness, and winter preparedness once integrated with domain-specific electricity, health, and air-quality datasets.
 
 ---
 
