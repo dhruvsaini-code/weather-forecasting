@@ -1,0 +1,6 @@
+year,number_of_forecast_days,mean_predicted_temperature,minimum_predicted_temperature,maximum_predicted_temperature,temperature_range,monthly_variation_sd,coverage_note,model_name
+2026,275,27.266,13.428,36.16,22.732,6.18,"Partial Year (Apr–Dec 2026, 275d)",Holt-Winters Damped
+2027,365,25.159,12.502,36.16,23.658,6.81,"Full Calendar Year (Jan–Dec 2027, 365d)",Holt-Winters Damped
+2028,366,25.128,12.502,36.16,23.658,6.826,"Full Leap Year (Jan–Dec 2028, 366d incl. Feb 29)",Holt-Winters Damped
+2029,365,25.159,12.502,36.16,23.658,6.812,"Full Calendar Year (Jan–Dec 2029, 365d)",Holt-Winters Damped
+2030,90,18.872,12.502,27.671,15.169,4.033,"Partial Year (Jan–Mar 2030, 90d)",Holt-Winters Damped

@@ -1,0 +1,145 @@
+year,month,mean_predicted_temperature,minimum_predicted_temperature,maximum_predicted_temperature,model_name
+2026,4,31.436,27.671,33.836,Holt-Winters Damped
+2026,5,34.004,30.835,36.16,Holt-Winters Damped
+2026,6,33.117,31.561,34.482,Holt-Winters Damped
+2026,7,30.488,29.308,32.322,Holt-Winters Damped
+2026,8,29.423,28.544,30.289,Holt-Winters Damped
+2026,9,28.462,25.777,29.56,Holt-Winters Damped
+2026,10,24.623,22.944,26.846,Holt-Winters Damped
+2026,11,19.343,16.978,22.673,Holt-Winters Damped
+2026,12,14.6,13.428,17.59,Holt-Winters Damped
+2027,1,14.143,12.502,15.771,Holt-Winters Damped
+2027,2,18.139,14.889,21.594,Holt-Winters Damped
+2027,3,23.823,21.345,27.236,Holt-Winters Damped
+2027,4,31.436,27.671,33.836,Holt-Winters Damped
+2027,5,34.004,30.835,36.16,Holt-Winters Damped
+2027,6,33.117,31.561,34.482,Holt-Winters Damped
+2027,7,30.488,29.308,32.322,Holt-Winters Damped
+2027,8,29.423,28.544,30.289,Holt-Winters Damped
+2027,9,28.462,25.777,29.56,Holt-Winters Damped
+2027,10,24.623,22.944,26.846,Holt-Winters Damped
+2027,11,19.343,16.978,22.673,Holt-Winters Damped
+2027,12,14.6,13.428,17.59,Holt-Winters Damped
+2028,1,14.143,12.502,15.771,Holt-Winters Damped
+2028,2,18.264,14.889,21.753,Holt-Winters Damped
+2028,3,24.014,21.345,27.671,Holt-Winters Damped
+2028,4,31.569,28.098,33.836,Holt-Winters Damped
+2028,5,34.089,30.835,36.16,Holt-Winters Damped
+2028,6,33.045,31.561,34.482,Holt-Winters Damped
+2028,7,30.42,29.308,32.322,Holt-Winters Damped
+2028,8,29.372,28.422,30.289,Holt-Winters Damped
+2028,9,28.374,25.777,29.56,Holt-Winters Damped
+2028,10,24.523,22.673,26.846,Holt-Winters Damped
+2028,11,19.174,16.978,21.814,Holt-Winters Damped
+2028,12,14.485,13.428,17.163,Holt-Winters Damped
+2029,1,14.17,12.502,15.771,Holt-Winters Damped
+2029,2,18.384,15.142,21.753,Holt-Winters Damped
+2029,3,24.014,21.345,27.671,Holt-Winters Damped
+2029,4,31.569,28.098,33.836,Holt-Winters Damped
+2029,5,34.089,30.835,36.16,Holt-Winters Damped
+2029,6,33.045,31.561,34.482,Holt-Winters Damped
+2029,7,30.42,29.308,32.322,Holt-Winters Damped
+2029,8,29.372,28.422,30.289,Holt-Winters Damped
+2029,9,28.374,25.777,29.56,Holt-Winters Damped
+2029,10,24.523,22.673,26.846,Holt-Winters Damped
+2029,11,19.174,16.978,21.814,Holt-Winters Damped
+2029,12,14.485,13.428,17.163,Holt-Winters Damped
+2030,1,14.17,12.502,15.771,Holt-Winters Damped
+2030,2,18.384,15.142,21.753,Holt-Winters Damped
+2030,3,24.014,21.345,27.671,Holt-Winters Damped
+2026,4,26.774,23.643,28.422,XGBoost Recursive
+2026,5,28.42,27.812,28.784,XGBoost Recursive
+2026,6,29.184,28.528,30.424,XGBoost Recursive
+2026,7,29.357,28.46,30.665,XGBoost Recursive
+2026,8,28.499,28.311,28.569,XGBoost Recursive
+2026,9,28.001,26.563,28.401,XGBoost Recursive
+2026,10,24.638,22.14,26.392,XGBoost Recursive
+2026,11,19.536,17.036,22.287,XGBoost Recursive
+2026,12,14.783,13.067,16.838,XGBoost Recursive
+2027,1,13.109,12.387,13.644,XGBoost Recursive
+2027,2,15.462,13.748,16.674,XGBoost Recursive
+2027,3,19.881,16.568,23.699,XGBoost Recursive
+2027,4,26.596,23.441,28.37,XGBoost Recursive
+2027,5,28.431,27.817,28.711,XGBoost Recursive
+2027,6,29.705,28.528,30.771,XGBoost Recursive
+2027,7,29.407,28.486,30.623,XGBoost Recursive
+2027,8,28.495,28.284,28.572,XGBoost Recursive
+2027,9,27.995,26.566,28.398,XGBoost Recursive
+2027,10,24.637,22.14,26.392,XGBoost Recursive
+2027,11,19.537,17.036,22.287,XGBoost Recursive
+2027,12,14.783,13.067,16.838,XGBoost Recursive
+2028,1,12.141,11.379,13.633,XGBoost Recursive
+2028,2,15.5,13.795,16.603,XGBoost Recursive
+2028,3,19.992,16.544,23.697,XGBoost Recursive
+2028,4,26.805,23.716,28.38,XGBoost Recursive
+2028,5,28.449,27.817,28.792,XGBoost Recursive
+2028,6,29.851,28.528,30.771,XGBoost Recursive
+2028,7,29.409,28.475,30.578,XGBoost Recursive
+2028,8,28.492,28.284,28.572,XGBoost Recursive
+2028,9,27.928,26.313,28.398,XGBoost Recursive
+2028,10,24.508,22.14,26.392,XGBoost Recursive
+2028,11,19.355,16.838,22.282,XGBoost Recursive
+2028,12,14.663,13.067,16.832,XGBoost Recursive
+2029,1,12.276,11.65,13.451,XGBoost Recursive
+2029,2,15.433,13.686,16.676,XGBoost Recursive
+2029,3,19.77,16.512,23.697,XGBoost Recursive
+2029,4,26.644,23.438,28.38,XGBoost Recursive
+2029,5,28.44,27.817,28.792,XGBoost Recursive
+2029,6,29.786,28.528,30.771,XGBoost Recursive
+2029,7,29.475,28.475,30.628,XGBoost Recursive
+2029,8,28.497,28.284,28.572,XGBoost Recursive
+2029,9,27.997,26.566,28.398,XGBoost Recursive
+2029,10,24.638,22.14,26.392,XGBoost Recursive
+2029,11,19.536,17.036,22.287,XGBoost Recursive
+2029,12,14.783,13.067,16.838,XGBoost Recursive
+2030,1,12.265,11.661,13.451,XGBoost Recursive
+2030,2,15.433,13.686,16.676,XGBoost Recursive
+2030,3,19.77,16.512,23.697,XGBoost Recursive
+2026,4,28.726,25.944,31.586,XGBoost Direct Seasonal
+2026,5,32.391,30.702,33.492,XGBoost Direct Seasonal
+2026,6,32.875,31.586,34.032,XGBoost Direct Seasonal
+2026,7,30.1,28.942,31.629,XGBoost Direct Seasonal
+2026,8,28.947,28.598,29.201,XGBoost Direct Seasonal
+2026,9,28.164,27.339,28.841,XGBoost Direct Seasonal
+2026,10,25.41,23.358,27.489,XGBoost Direct Seasonal
+2026,11,20.155,17.396,23.552,XGBoost Direct Seasonal
+2026,12,15.06,12.725,17.125,XGBoost Direct Seasonal
+2027,1,12.893,12.117,14.175,XGBoost Direct Seasonal
+2027,2,16.637,14.331,19.574,XGBoost Direct Seasonal
+2027,3,22.694,19.352,25.554,XGBoost Direct Seasonal
+2027,4,28.856,25.944,31.597,XGBoost Direct Seasonal
+2027,5,32.38,30.658,33.539,XGBoost Direct Seasonal
+2027,6,32.92,31.297,33.82,XGBoost Direct Seasonal
+2027,7,30.069,29.062,31.533,XGBoost Direct Seasonal
+2027,8,28.943,28.615,29.136,XGBoost Direct Seasonal
+2027,9,28.208,27.364,28.818,XGBoost Direct Seasonal
+2027,10,25.413,23.339,27.434,XGBoost Direct Seasonal
+2027,11,20.148,17.396,23.47,XGBoost Direct Seasonal
+2027,12,15.012,12.725,17.197,XGBoost Direct Seasonal
+2028,1,12.826,12.203,14.251,XGBoost Direct Seasonal
+2028,2,16.684,14.297,19.184,XGBoost Direct Seasonal
+2028,3,22.434,19.403,25.982,XGBoost Direct Seasonal
+2028,4,29.029,26.174,31.597,XGBoost Direct Seasonal
+2028,5,32.455,30.658,33.522,XGBoost Direct Seasonal
+2028,6,32.891,31.306,33.791,XGBoost Direct Seasonal
+2028,7,29.993,29.033,31.542,XGBoost Direct Seasonal
+2028,8,28.934,28.61,29.136,XGBoost Direct Seasonal
+2028,9,28.162,27.358,28.818,XGBoost Direct Seasonal
+2028,10,25.274,23.001,27.434,XGBoost Direct Seasonal
+2028,11,19.932,17.108,22.794,XGBoost Direct Seasonal
+2028,12,14.888,12.725,17.197,XGBoost Direct Seasonal
+2029,1,12.832,12.236,14.251,XGBoost Direct Seasonal
+2029,2,16.596,14.297,18.977,XGBoost Direct Seasonal
+2029,3,22.198,19.191,25.59,XGBoost Direct Seasonal
+2029,4,28.857,25.944,31.588,XGBoost Direct Seasonal
+2029,5,32.391,30.658,33.522,XGBoost Direct Seasonal
+2029,6,32.923,31.306,33.822,XGBoost Direct Seasonal
+2029,7,30.075,29.062,31.542,XGBoost Direct Seasonal
+2029,8,28.943,28.6,29.136,XGBoost Direct Seasonal
+2029,9,28.209,27.395,28.835,XGBoost Direct Seasonal
+2029,10,25.394,23.099,27.434,XGBoost Direct Seasonal
+2029,11,20.123,17.396,23.03,XGBoost Direct Seasonal
+2029,12,14.996,12.725,17.197,XGBoost Direct Seasonal
+2030,1,12.83,12.236,14.251,XGBoost Direct Seasonal
+2030,2,16.575,14.297,18.977,XGBoost Direct Seasonal
+2030,3,22.171,19.254,25.554,XGBoost Direct Seasonal

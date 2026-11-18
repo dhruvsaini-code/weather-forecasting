@@ -1,0 +1,16 @@
+year,number_of_forecast_days,mean_predicted_temperature,minimum_predicted_temperature,maximum_predicted_temperature,temperature_range,monthly_variation_sd,coverage_note,is_partial_year,model_name
+2026,275,27.266,13.428,36.16,22.732,6.18,"Partial Year (Apr–Dec 2026, 275d)",True,Holt-Winters Damped
+2027,365,25.159,12.502,36.16,23.658,6.81,"Full Calendar Year (Jan–Dec 2027, 365d)",False,Holt-Winters Damped
+2028,366,25.128,12.502,36.16,23.658,6.826,"Full Leap Year (Jan–Dec 2028, 366d incl. Feb 29)",False,Holt-Winters Damped
+2029,365,25.159,12.502,36.16,23.658,6.812,"Full Calendar Year (Jan–Dec 2029, 365d)",False,Holt-Winters Damped
+2030,90,18.872,12.502,27.671,15.169,4.033,"Partial Year (Jan–Mar 2030, 90d)",True,Holt-Winters Damped
+2026,275,25.46,13.067,30.665,17.598,4.773,"Partial Year (Apr–Dec 2026, 275d)",True,XGBoost Recursive
+2027,365,23.203,12.387,30.771,18.384,5.985,"Full Calendar Year (Jan–Dec 2027, 365d)",False,XGBoost Recursive
+2028,366,23.101,11.379,30.771,19.392,6.156,"Full Leap Year (Jan–Dec 2028, 366d incl. Feb 29)",False,XGBoost Recursive
+2029,365,23.138,11.65,30.771,19.121,6.129,"Full Calendar Year (Jan–Dec 2029, 365d)",False,XGBoost Recursive
+2030,90,15.836,11.661,23.697,12.036,3.076,"Partial Year (Jan–Mar 2030, 90d)",True,XGBoost Recursive
+2026,275,26.861,12.725,34.032,21.307,5.509,"Partial Year (Apr–Dec 2026, 275d)",True,XGBoost Direct Seasonal
+2027,365,24.546,12.117,33.82,21.703,6.621,"Full Calendar Year (Jan–Dec 2027, 365d)",False,XGBoost Direct Seasonal
+2028,366,24.468,12.203,33.791,21.588,6.664,"Full Leap Year (Jan–Dec 2028, 366d incl. Feb 29)",False,XGBoost Direct Seasonal
+2029,365,24.492,12.236,33.822,21.586,6.652,"Full Calendar Year (Jan–Dec 2029, 365d)",False,XGBoost Direct Seasonal
+2030,90,17.213,12.236,25.554,13.318,3.838,"Partial Year (Jan–Mar 2030, 90d)",True,XGBoost Direct Seasonal

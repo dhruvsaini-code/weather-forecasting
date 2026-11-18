@@ -1,0 +1,6 @@
+year,number_of_forecast_days,mean_predicted_temperature,minimum_predicted_temperature,maximum_predicted_temperature,temperature_range,monthly_variation_sd,coverage_note,model_name
+2026,275,25.46,13.067,30.665,17.598,4.773,"Partial Year (Apr–Dec 2026, 275d)",XGBoost Recursive
+2027,365,23.203,12.387,30.771,18.384,5.985,"Full Calendar Year (Jan–Dec 2027, 365d)",XGBoost Recursive
+2028,366,23.101,11.379,30.771,19.392,6.156,"Full Leap Year (Jan–Dec 2028, 366d incl. Feb 29)",XGBoost Recursive
+2029,365,23.138,11.65,30.771,19.121,6.129,"Full Calendar Year (Jan–Dec 2029, 365d)",XGBoost Recursive
+2030,90,15.836,11.661,23.697,12.036,3.076,"Partial Year (Jan–Mar 2030, 90d)",XGBoost Recursive
