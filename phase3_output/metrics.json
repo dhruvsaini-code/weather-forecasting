@@ -1,0 +1,924 @@
+{
+  "project_metadata": {
+    "title": "Comparative Classical and Gradient Boosted (XGBoost) Time-Series Forecasting of Urban Weather Dynamics in Delhi (1996\u20132026)",
+    "phase": "Phase 3: Final Project Evaluation (12 Marks)",
+    "team": [
+      {
+        "name": "Dhruv Saini",
+        "roll_no": "S24CSEU0818"
+      },
+      {
+        "name": "Aarush Saxena",
+        "roll_no": "S24CSEU1682"
+      }
+    ],
+    "course": "CSET 369 \u2013 Time Series Analysis & Forecasting",
+    "institution": "Bennett University",
+    "total_days": 11035,
+    "train_days_raw": 10670,
+    "train_days_effective": 10305,
+    "test_days": 365,
+    "train_range": [
+      "1996-01-01",
+      "2025-03-18"
+    ],
+    "test_range": [
+      "2025-03-19",
+      "2026-03-18"
+    ],
+    "zero_leakage_perturbation_max_diff": 0.0
+  },
+  "engineered_features": {
+    "count": 25,
+    "features": [
+      "lag_1",
+      "lag_2",
+      "lag_3",
+      "lag_7",
+      "lag_14",
+      "lag_30",
+      "lag_365",
+      "roll_mean_7",
+      "roll_std_7",
+      "roll_mean_14",
+      "roll_std_14",
+      "roll_mean_30",
+      "roll_std_30",
+      "month",
+      "dayofyear",
+      "sin_doy_1",
+      "cos_doy_1",
+      "sin_doy_2",
+      "cos_doy_2",
+      "clim_doy_mean",
+      "temp_momentum_1d",
+      "temp_anomaly_7d",
+      "lag1_dtr",
+      "lag1_humidity",
+      "lag1_rain"
+    ],
+    "groups": {
+      "lags": [
+        "lag_1",
+        "lag_2",
+        "lag_3",
+        "lag_7",
+        "lag_14",
+        "lag_30",
+        "lag_365"
+      ],
+      "rolling_means_shifted_1d": [
+        "roll_mean_7",
+        "roll_mean_14",
+        "roll_mean_30"
+      ],
+      "rolling_stds_shifted_1d": [
+        "roll_std_7",
+        "roll_std_14",
+        "roll_std_30"
+      ],
+      "seasonal_calendar_harmonics": [
+        "month",
+        "dayofyear",
+        "sin_doy_1",
+        "cos_doy_1",
+        "sin_doy_2",
+        "cos_doy_2",
+        "clim_doy_mean"
+      ],
+      "momentum_and_exogenous_shifted_1d": [
+        "temp_momentum_1d",
+        "temp_anomaly_7d",
+        "lag1_dtr",
+        "lag1_humidity",
+        "lag1_rain"
+      ]
+    }
+  },
+  "hyperparameter_tuning": {
+    "strategy": "5-Fold Expanding-Window TimeSeriesSplit (test_size = 365 days per fold)",
+    "best_params": {
+      "n_estimators": 450,
+      "max_depth": 4,
+      "learning_rate": 0.025,
+      "subsample": 0.85,
+      "colsample_bytree": 0.8
+    },
+    "best_cv_rmse": 0.9736,
+    "default_cv_rmse": 1.0493,
+    "candidates": [
+      {
+        "label": "Default (Untuned)",
+        "n_estimators": 100,
+        "max_depth": 6,
+        "learning_rate": 0.3,
+        "subsample": 1.0,
+        "colsample_bytree": 1.0,
+        "cv_rmse_mean": 1.0493,
+        "cv_rmse_std": 0.0163,
+        "cv_mae_mean": 0.7944,
+        "fold_rmses": [
+          1.0207,
+          1.0569,
+          1.07,
+          1.0456,
+          1.0531
+        ]
+      },
+      {
+        "label": "Shallow Fast",
+        "n_estimators": 200,
+        "max_depth": 3,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "cv_rmse_mean": 0.9752,
+        "cv_rmse_std": 0.0358,
+        "cv_mae_mean": 0.7389,
+        "fold_rmses": [
+          0.9418,
+          1.004,
+          1.0227,
+          0.9792,
+          0.9284
+        ]
+      },
+      {
+        "label": "Tuned Optimal (D=4)",
+        "n_estimators": 350,
+        "max_depth": 4,
+        "learning_rate": 0.03,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "cv_rmse_mean": 0.9746,
+        "cv_rmse_std": 0.0308,
+        "cv_mae_mean": 0.736,
+        "fold_rmses": [
+          0.9549,
+          0.9956,
+          1.0198,
+          0.9713,
+          0.9314
+        ]
+      },
+      {
+        "label": "Regularized (D=4,450)",
+        "n_estimators": 450,
+        "max_depth": 4,
+        "learning_rate": 0.025,
+        "subsample": 0.85,
+        "colsample_bytree": 0.8,
+        "cv_rmse_mean": 0.9736,
+        "cv_rmse_std": 0.0312,
+        "cv_mae_mean": 0.7357,
+        "fold_rmses": [
+          0.954,
+          0.9959,
+          1.0202,
+          0.9664,
+          0.9317
+        ]
+      },
+      {
+        "label": "Moderate Depth (D=5)",
+        "n_estimators": 400,
+        "max_depth": 5,
+        "learning_rate": 0.03,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "cv_rmse_mean": 0.9806,
+        "cv_rmse_std": 0.0258,
+        "cv_mae_mean": 0.7403,
+        "fold_rmses": [
+          0.9647,
+          1.002,
+          1.0186,
+          0.9692,
+          0.9483
+        ]
+      },
+      {
+        "label": "Deep Trees (D=6)",
+        "n_estimators": 500,
+        "max_depth": 6,
+        "learning_rate": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9,
+        "cv_rmse_mean": 0.9992,
+        "cv_rmse_std": 0.0204,
+        "cv_mae_mean": 0.7545,
+        "fold_rmses": [
+          0.9981,
+          1.0225,
+          1.0202,
+          0.9864,
+          0.9687
+        ]
+      },
+      {
+        "label": "Very Deep (D=8)",
+        "n_estimators": 500,
+        "max_depth": 8,
+        "learning_rate": 0.05,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9,
+        "cv_rmse_mean": 1.0227,
+        "cv_rmse_std": 0.0132,
+        "cv_mae_mean": 0.7775,
+        "fold_rmses": [
+          1.0364,
+          1.0145,
+          1.0336,
+          1.028,
+          1.0009
+        ]
+      }
+    ],
+    "depth_sensitivity": [
+      {
+        "max_depth": 2,
+        "cv_rmse": 0.9833
+      },
+      {
+        "max_depth": 3,
+        "cv_rmse": 0.9771
+      },
+      {
+        "max_depth": 4,
+        "cv_rmse": 0.9746
+      },
+      {
+        "max_depth": 5,
+        "cv_rmse": 0.9805
+      },
+      {
+        "max_depth": 6,
+        "cv_rmse": 0.9871
+      },
+      {
+        "max_depth": 8,
+        "cv_rmse": 1.0004
+      }
+    ]
+  },
+  "comparative_metrics_daily_365": {
+    "XGBoost (Tuned)": {
+      "RMSE": 1.111,
+      "MAE": 0.81,
+      "MAPE": 3.48,
+      "R2": 0.9744,
+      "Max_Error": 5.7,
+      "Bias": 0.096
+    },
+    "XGBoost (Untuned Default)": {
+      "RMSE": 1.154,
+      "MAE": 0.837,
+      "MAPE": 3.57,
+      "R2": 0.9724,
+      "Max_Error": 5.5,
+      "Bias": 0.113
+    },
+    "Holt-Winters Damped": {
+      "RMSE": 2.129,
+      "MAE": 1.657,
+      "MAPE": 7.13,
+      "R2": 0.9061,
+      "Max_Error": 7.28,
+      "Bias": 0.362
+    },
+    "Holt-Winters Additive": {
+      "RMSE": 2.228,
+      "MAE": 1.73,
+      "MAPE": 7.37,
+      "R2": 0.8972,
+      "Max_Error": 7.55,
+      "Bias": 0.616
+    },
+    "XGBoost (Seasonal No-Lag 365d)": {
+      "RMSE": 2.305,
+      "MAE": 1.824,
+      "MAPE": 7.83,
+      "R2": 0.89,
+      "Max_Error": 6.73,
+      "Bias": 0.484
+    },
+    "SARIMAX (Fourier K=3, ARIMA(2,0,1))": {
+      "RMSE": 2.376,
+      "MAE": 1.879,
+      "MAPE": 8.03,
+      "R2": 0.8831,
+      "Max_Error": 6.63,
+      "Bias": 0.55
+    },
+    "Seasonal Naive": {
+      "RMSE": 2.909,
+      "MAE": 2.243,
+      "MAPE": 9.69,
+      "R2": 0.8247,
+      "Max_Error": 9.57,
+      "Bias": -0.172
+    },
+    "ARIMA(2,1,2)": {
+      "RMSE": 7.244,
+      "MAE": 6.47,
+      "MAPE": 29.69,
+      "R2": -0.0869,
+      "Max_Error": 14.64,
+      "Bias": 2.049
+    },
+    "Naive (Persistence)": {
+      "RMSE": 7.403,
+      "MAE": 6.648,
+      "MAPE": 29.81,
+      "R2": -0.1349,
+      "Max_Error": 15.15,
+      "Bias": 2.552
+    },
+    "Holt Linear Trend": {
+      "RMSE": 7.412,
+      "MAE": 6.648,
+      "MAPE": 30.0,
+      "R2": -0.1377,
+      "Max_Error": 15.09,
+      "Bias": 2.429
+    }
+  },
+  "ablation_study": [
+    {
+      "group": "Seasonal + Lag-365 Only (No Short Lags)",
+      "num_features": 8,
+      "RMSE": 2.324,
+      "MAE": 1.835,
+      "MAPE": 7.89,
+      "R2": 0.8882,
+      "Max_Error": 6.71,
+      "Bias": 0.495
+    },
+    {
+      "group": "Autoregressive Lags Only (1..365d)",
+      "num_features": 7,
+      "RMSE": 1.205,
+      "MAE": 0.868,
+      "MAPE": 3.78,
+      "R2": 0.9699,
+      "Max_Error": 5.75,
+      "Bias": 0.004
+    },
+    {
+      "group": "Lags + Shifted Rolling Stats",
+      "num_features": 13,
+      "RMSE": 1.201,
+      "MAE": 0.863,
+      "MAPE": 3.76,
+      "R2": 0.9701,
+      "Max_Error": 5.69,
+      "Bias": -0.002
+    },
+    {
+      "group": "Lags + Rolling + Seasonal Harmonics",
+      "num_features": 20,
+      "RMSE": 1.179,
+      "MAE": 0.853,
+      "MAPE": 3.7,
+      "R2": 0.9712,
+      "Max_Error": 5.68,
+      "Bias": 0.056
+    },
+    {
+      "group": "Full Feature Set (+ Exogenous & Momentum)",
+      "num_features": 25,
+      "RMSE": 1.111,
+      "MAE": 0.81,
+      "MAPE": 3.48,
+      "R2": 0.9744,
+      "Max_Error": 5.7,
+      "Bias": 0.096
+    }
+  ],
+  "feature_importance": {
+    "gain_ranked": [
+      {
+        "feature": "lag_1",
+        "gain": 6626.38,
+        "gain_pct": 55.69,
+        "weight_splits": 1146,
+        "weight_pct": 17.3,
+        "cover": 2562.12
+      },
+      {
+        "feature": "roll_mean_7",
+        "gain": 2124.23,
+        "gain_pct": 17.85,
+        "weight_splits": 177,
+        "weight_pct": 2.67,
+        "cover": 2801.38
+      },
+      {
+        "feature": "clim_doy_mean",
+        "gain": 1391.63,
+        "gain_pct": 11.7,
+        "weight_splits": 269,
+        "weight_pct": 4.06,
+        "cover": 4033.88
+      },
+      {
+        "feature": "lag_2",
+        "gain": 1143.16,
+        "gain_pct": 9.61,
+        "weight_splits": 261,
+        "weight_pct": 3.94,
+        "cover": 1836.16
+      },
+      {
+        "feature": "cos_doy_1",
+        "gain": 266.27,
+        "gain_pct": 2.24,
+        "weight_splits": 214,
+        "weight_pct": 3.23,
+        "cover": 3479.0
+      },
+      {
+        "feature": "temp_momentum_1d",
+        "gain": 36.65,
+        "gain_pct": 0.31,
+        "weight_splits": 673,
+        "weight_pct": 10.16,
+        "cover": 2579.05
+      },
+      {
+        "feature": "cos_doy_2",
+        "gain": 32.26,
+        "gain_pct": 0.27,
+        "weight_splits": 65,
+        "weight_pct": 0.98,
+        "cover": 1551.32
+      },
+      {
+        "feature": "lag1_humidity",
+        "gain": 32.01,
+        "gain_pct": 0.27,
+        "weight_splits": 385,
+        "weight_pct": 5.81,
+        "cover": 2678.43
+      },
+      {
+        "feature": "lag1_rain",
+        "gain": 30.52,
+        "gain_pct": 0.26,
+        "weight_splits": 298,
+        "weight_pct": 4.5,
+        "cover": 2953.63
+      },
+      {
+        "feature": "roll_mean_14",
+        "gain": 27.97,
+        "gain_pct": 0.24,
+        "weight_splits": 176,
+        "weight_pct": 2.66,
+        "cover": 2625.56
+      },
+      {
+        "feature": "lag1_dtr",
+        "gain": 27.1,
+        "gain_pct": 0.23,
+        "weight_splits": 726,
+        "weight_pct": 10.96,
+        "cover": 2601.62
+      },
+      {
+        "feature": "roll_mean_30",
+        "gain": 25.76,
+        "gain_pct": 0.22,
+        "weight_splits": 183,
+        "weight_pct": 2.76,
+        "cover": 3036.04
+      },
+      {
+        "feature": "dayofyear",
+        "gain": 22.34,
+        "gain_pct": 0.19,
+        "weight_splits": 101,
+        "weight_pct": 1.52,
+        "cover": 2084.09
+      },
+      {
+        "feature": "temp_anomaly_7d",
+        "gain": 22.16,
+        "gain_pct": 0.19,
+        "weight_splits": 238,
+        "weight_pct": 3.59,
+        "cover": 1551.93
+      },
+      {
+        "feature": "lag_7",
+        "gain": 9.98,
+        "gain_pct": 0.08,
+        "weight_splits": 176,
+        "weight_pct": 2.66,
+        "cover": 2098.06
+      },
+      {
+        "feature": "lag_14",
+        "gain": 9.36,
+        "gain_pct": 0.08,
+        "weight_splits": 158,
+        "weight_pct": 2.38,
+        "cover": 1137.46
+      },
+      {
+        "feature": "lag_30",
+        "gain": 9.54,
+        "gain_pct": 0.08,
+        "weight_splits": 244,
+        "weight_pct": 3.68,
+        "cover": 1982.42
+      },
+      {
+        "feature": "month",
+        "gain": 10.03,
+        "gain_pct": 0.08,
+        "weight_splits": 14,
+        "weight_pct": 0.21,
+        "cover": 1114.0
+      },
+      {
+        "feature": "sin_doy_1",
+        "gain": 9.77,
+        "gain_pct": 0.08,
+        "weight_splits": 102,
+        "weight_pct": 1.54,
+        "cover": 1474.98
+      },
+      {
+        "feature": "sin_doy_2",
+        "gain": 8.6,
+        "gain_pct": 0.07,
+        "weight_splits": 79,
+        "weight_pct": 1.19,
+        "cover": 1964.57
+      },
+      {
+        "feature": "lag_3",
+        "gain": 7.69,
+        "gain_pct": 0.06,
+        "weight_splits": 204,
+        "weight_pct": 3.08,
+        "cover": 2690.53
+      },
+      {
+        "feature": "lag_365",
+        "gain": 6.92,
+        "gain_pct": 0.06,
+        "weight_splits": 181,
+        "weight_pct": 2.73,
+        "cover": 1904.57
+      },
+      {
+        "feature": "roll_std_30",
+        "gain": 6.98,
+        "gain_pct": 0.06,
+        "weight_splits": 198,
+        "weight_pct": 2.99,
+        "cover": 863.33
+      },
+      {
+        "feature": "roll_std_7",
+        "gain": 5.95,
+        "gain_pct": 0.05,
+        "weight_splits": 181,
+        "weight_pct": 2.73,
+        "cover": 1155.12
+      },
+      {
+        "feature": "roll_std_14",
+        "gain": 5.95,
+        "gain_pct": 0.05,
+        "weight_splits": 176,
+        "weight_pct": 2.66,
+        "cover": 924.33
+      }
+    ],
+    "weight_ranked": [
+      {
+        "feature": "lag_1",
+        "gain": 6626.38,
+        "gain_pct": 55.69,
+        "weight_splits": 1146,
+        "weight_pct": 17.3,
+        "cover": 2562.12
+      },
+      {
+        "feature": "lag1_dtr",
+        "gain": 27.1,
+        "gain_pct": 0.23,
+        "weight_splits": 726,
+        "weight_pct": 10.96,
+        "cover": 2601.62
+      },
+      {
+        "feature": "temp_momentum_1d",
+        "gain": 36.65,
+        "gain_pct": 0.31,
+        "weight_splits": 673,
+        "weight_pct": 10.16,
+        "cover": 2579.05
+      },
+      {
+        "feature": "lag1_humidity",
+        "gain": 32.01,
+        "gain_pct": 0.27,
+        "weight_splits": 385,
+        "weight_pct": 5.81,
+        "cover": 2678.43
+      },
+      {
+        "feature": "lag1_rain",
+        "gain": 30.52,
+        "gain_pct": 0.26,
+        "weight_splits": 298,
+        "weight_pct": 4.5,
+        "cover": 2953.63
+      },
+      {
+        "feature": "clim_doy_mean",
+        "gain": 1391.63,
+        "gain_pct": 11.7,
+        "weight_splits": 269,
+        "weight_pct": 4.06,
+        "cover": 4033.88
+      },
+      {
+        "feature": "lag_2",
+        "gain": 1143.16,
+        "gain_pct": 9.61,
+        "weight_splits": 261,
+        "weight_pct": 3.94,
+        "cover": 1836.16
+      },
+      {
+        "feature": "lag_30",
+        "gain": 9.54,
+        "gain_pct": 0.08,
+        "weight_splits": 244,
+        "weight_pct": 3.68,
+        "cover": 1982.42
+      },
+      {
+        "feature": "temp_anomaly_7d",
+        "gain": 22.16,
+        "gain_pct": 0.19,
+        "weight_splits": 238,
+        "weight_pct": 3.59,
+        "cover": 1551.93
+      },
+      {
+        "feature": "cos_doy_1",
+        "gain": 266.27,
+        "gain_pct": 2.24,
+        "weight_splits": 214,
+        "weight_pct": 3.23,
+        "cover": 3479.0
+      },
+      {
+        "feature": "lag_3",
+        "gain": 7.69,
+        "gain_pct": 0.06,
+        "weight_splits": 204,
+        "weight_pct": 3.08,
+        "cover": 2690.53
+      },
+      {
+        "feature": "roll_std_30",
+        "gain": 6.98,
+        "gain_pct": 0.06,
+        "weight_splits": 198,
+        "weight_pct": 2.99,
+        "cover": 863.33
+      },
+      {
+        "feature": "roll_mean_30",
+        "gain": 25.76,
+        "gain_pct": 0.22,
+        "weight_splits": 183,
+        "weight_pct": 2.76,
+        "cover": 3036.04
+      },
+      {
+        "feature": "lag_365",
+        "gain": 6.92,
+        "gain_pct": 0.06,
+        "weight_splits": 181,
+        "weight_pct": 2.73,
+        "cover": 1904.57
+      },
+      {
+        "feature": "roll_std_7",
+        "gain": 5.95,
+        "gain_pct": 0.05,
+        "weight_splits": 181,
+        "weight_pct": 2.73,
+        "cover": 1155.12
+      },
+      {
+        "feature": "roll_mean_7",
+        "gain": 2124.23,
+        "gain_pct": 17.85,
+        "weight_splits": 177,
+        "weight_pct": 2.67,
+        "cover": 2801.38
+      },
+      {
+        "feature": "lag_7",
+        "gain": 9.98,
+        "gain_pct": 0.08,
+        "weight_splits": 176,
+        "weight_pct": 2.66,
+        "cover": 2098.06
+      },
+      {
+        "feature": "roll_mean_14",
+        "gain": 27.97,
+        "gain_pct": 0.24,
+        "weight_splits": 176,
+        "weight_pct": 2.66,
+        "cover": 2625.56
+      },
+      {
+        "feature": "roll_std_14",
+        "gain": 5.95,
+        "gain_pct": 0.05,
+        "weight_splits": 176,
+        "weight_pct": 2.66,
+        "cover": 924.33
+      },
+      {
+        "feature": "lag_14",
+        "gain": 9.36,
+        "gain_pct": 0.08,
+        "weight_splits": 158,
+        "weight_pct": 2.38,
+        "cover": 1137.46
+      },
+      {
+        "feature": "sin_doy_1",
+        "gain": 9.77,
+        "gain_pct": 0.08,
+        "weight_splits": 102,
+        "weight_pct": 1.54,
+        "cover": 1474.98
+      },
+      {
+        "feature": "dayofyear",
+        "gain": 22.34,
+        "gain_pct": 0.19,
+        "weight_splits": 101,
+        "weight_pct": 1.52,
+        "cover": 2084.09
+      },
+      {
+        "feature": "sin_doy_2",
+        "gain": 8.6,
+        "gain_pct": 0.07,
+        "weight_splits": 79,
+        "weight_pct": 1.19,
+        "cover": 1964.57
+      },
+      {
+        "feature": "cos_doy_2",
+        "gain": 32.26,
+        "gain_pct": 0.27,
+        "weight_splits": 65,
+        "weight_pct": 0.98,
+        "cover": 1551.32
+      },
+      {
+        "feature": "month",
+        "gain": 10.03,
+        "gain_pct": 0.08,
+        "weight_splits": 14,
+        "weight_pct": 0.21,
+        "cover": 1114.0
+      }
+    ]
+  },
+  "xgboost_diagnostics": {
+    "residual_diagnostics": {
+      "mean": 0.0957,
+      "std": 1.1068,
+      "skewness": -1.3719,
+      "kurtosis": 4.4119,
+      "jarque_bera_stat": 410.5268,
+      "jarque_bera_pvalue": 0.0,
+      "ljung_box_lag7_stat": 2.636,
+      "ljung_box_lag7_p": 0.9165,
+      "ljung_box_lag14_stat": 7.084,
+      "ljung_box_lag14_p": 0.9314
+    },
+    "seasonal_breakdown": {
+      "Winter": {
+        "days": 90,
+        "actual_mean": 15.28,
+        "pred_mean": 15.130000114440918,
+        "RMSE": 0.974,
+        "MAE": 0.732,
+        "MAPE": 4.92
+      },
+      "Summer": {
+        "days": 92,
+        "actual_mean": 29.35,
+        "pred_mean": 29.1200008392334,
+        "RMSE": 1.409,
+        "MAE": 1.029,
+        "MAPE": 3.61
+      },
+      "Monsoon": {
+        "days": 122,
+        "actual_mean": 30.16,
+        "pred_mean": 30.06999969482422,
+        "RMSE": 1.036,
+        "MAE": 0.812,
+        "MAPE": 2.69
+      },
+      "Post-monsoon": {
+        "days": 61,
+        "actual_mean": 22.18,
+        "pred_mean": 22.350000381469727,
+        "RMSE": 0.918,
+        "MAE": 0.595,
+        "MAPE": 2.75
+      }
+    },
+    "extremes_breakdown": {
+      "heatwave_extreme": {
+        "criterion": "Daily Max Temp >= 38 \u00b0C",
+        "count_days": 45,
+        "mean_actual_tmean": 33.8,
+        "mean_pred_tmean": 33.20000076293945,
+        "RMSE": 0.969,
+        "MAE": 0.801
+      },
+      "coldsnap_extreme": {
+        "criterion": "Daily Min Temp <= 8 \u00b0C",
+        "count_days": 20,
+        "mean_actual_tmean": 11.57,
+        "mean_pred_tmean": 11.720000267028809,
+        "RMSE": 0.906,
+        "MAE": 0.748
+      }
+    },
+    "worst_error_days": [
+      {
+        "date": "2025-05-25",
+        "season": "Summer",
+        "actual_tmean": 28.31,
+        "pred_xgboost": 34.02,
+        "residual": -5.7,
+        "rain_mm": 0.3
+      },
+      {
+        "date": "2025-05-02",
+        "season": "Summer",
+        "actual_tmean": 26.34,
+        "pred_xgboost": 31.89,
+        "residual": -5.55,
+        "rain_mm": 13.6
+      },
+      {
+        "date": "2025-10-06",
+        "season": "Post-monsoon",
+        "actual_tmean": 23.77,
+        "pred_xgboost": 28.16,
+        "residual": -4.39,
+        "rain_mm": 29.2
+      },
+      {
+        "date": "2025-06-16",
+        "season": "Monsoon",
+        "actual_tmean": 29.95,
+        "pred_xgboost": 33.7,
+        "residual": -3.75,
+        "rain_mm": 20.5
+      },
+      {
+        "date": "2026-02-18",
+        "season": "Winter",
+        "actual_tmean": 18.26,
+        "pred_xgboost": 21.9,
+        "residual": -3.64,
+        "rain_mm": 1.3
+      }
+    ]
+  },
+  "best_overall_model": {
+    "name": "XGBoost (Tuned)",
+    "metrics": {
+      "RMSE": 1.111,
+      "MAE": 0.81,
+      "MAPE": 3.48,
+      "R2": 0.9744,
+      "Max_Error": 5.7,
+      "Bias": 0.096
+    },
+    "improvement_over_phase2_champion_pct": 47.82
+  }
+}
