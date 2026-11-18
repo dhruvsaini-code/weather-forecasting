@@ -24,20 +24,31 @@ An end-to-end **Time-Series Analysis, Classical Statistical Modeling, and Gradie
 
 ## ⚡ Master Comparative Benchmark (365-Day Holdout: 19 Mar 2025 – 18 Mar 2026)
 
-All Phase 2 classical models and Phase 3 XGBoost architectures are evaluated strictly on the **identical 365-day out-of-sample test window (`2025-03-19` to `2026-03-18`)** with **zero lookahead data leakage** (programmatically verified via future-perturbation sensitivity $= 0.000000$):
+All Phase 2 classical models and Phase 3 XGBoost architectures are evaluated strictly on the **identical 365-day out-of-sample test window (`2025-03-19` to `2026-03-18`)** with **post-split causal forward-fill preprocessing** (`0` NaNs in train/test splits; no pre-split `.interpolate()` and no backward `.bfill()`) and **zero lookahead data leakage** (future-perturbation sensitivity $= 0.000000$).
 
-| Model Architecture | Project Phase | Model Family / Forecasting Mode | RMSE (°C) | MAE (°C) | MAPE (%) | $R^2$ Score | Max Error (°C) | Bias (°C) | Status |
+To ensure a 100% fair comparison across forecasting horizons, models are explicitly separated and benchmarked across both **Regime A: Rolling 1-Day-Ahead Forecasting ($h = 1$)** (using actual observations up to $t-1$) and **Regime B: Fixed 365-Day Multi-Step Forecasting ($h = 1 \dots 365$)** (using zero test-period observations):
+
+### Regime A: Rolling 1-Day-Ahead Horizon ($h = 1$ Step Ahead)
+| Model Architecture | Phase | Model Family / Mode | RMSE (°C) | MAE (°C) | MAPE (%) | $R^2$ Score | Max Error (°C) | Bias (°C) | Status |
 | :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **XGBoost (Tuned Champion)** | **Phase 3** | **Gradient Boosted Trees (25 Lag/Roll/Seas/Exog Features)** | **1.111** | **0.810** | **3.48%** | **0.9744** | **5.70** | **+0.096** | 🏆 **Overall Champion (-47.8% vs P2)** |
+| **XGBoost (Tuned Champion)** | **Phase 3** | **Gradient Boosted Trees (25 Causal Features)** | **1.111** | **0.810** | **3.48%** | **0.9744** | **5.70** | **+0.096** | 🏆 **Overall & 1-Step Champion** |
 | **XGBoost (Untuned Default)** | Phase 3 | Gradient Boosted Trees (`depth=6, lr=0.30`) | **1.154** | 0.837 | 3.57% | 0.9724 | 5.50 | +0.113 | Pre-Tuning ML Baseline |
-| **Holt-Winters Damped** | **Phase 2** | **Triple Exp. Smoothing ($m=365, \phi=0.9891$)** | **2.129** | **1.657** | **7.13%** | **0.9061** | **7.28** | **+0.362** | 🥇 **Phase 2 Classical Champion** |
-| **Holt-Winters Additive** | Phase 2 | Triple Exp. Smoothing ($m=365$, Undamped) | **2.228** | 1.730 | 7.37% | 0.8972 | 7.55 | +0.616 | Strong Classical Runner-Up |
-| **XGBoost (Seasonal No-Lag 365d)** | Phase 3 | Ablation (`lag_365` + Harmonics Only, No Short Lags) | **2.305** | 1.824 | 7.83% | 0.8900 | 6.73 | +0.484 | 365d Long-Horizon Ablation |
-| **SARIMAX (Fourier $K=3$)** | Phase 2 | Dynamic Harmonic Reg. + $\text{ARIMA}(2,0,1)$ | **2.376** | 1.879 | 8.03% | 0.8831 | 6.63 | +0.550 | Harmonic Classical Model |
-| **Seasonal Naive (365d)** | Phase 2 | Non-parametric Annual Persistence ($y_{t-365}$) | **2.909** | 2.243 | 9.69% | 0.8247 | 9.57 | -0.172 | Seasonal Baseline |
-| **Classical ARIMA(2,1,2)** | Phase 2 | Box-Jenkins Non-Seasonal ($d=1$) | **7.244** | 6.470 | 29.69% | -0.0869 | 14.64 | +2.049 | Non-Seasonal Mean Reversion |
-| **Naive (Persistence)** | Phase 2 | Random Walk Baseline ($y_T$) | **7.403** | 6.648 | 29.81% | -0.1349 | 15.15 | +2.552 | Memoryless Baseline |
-| **Holt Linear Trend** | Phase 2 | Double Exp. Smoothing (No Seasonality) | **7.412** | 6.648 | 30.00% | -0.1377 | 15.09 | +2.429 | Unbounded Linear Drift |
+| **SARIMAX (Fourier $K=3$, 1-Step)** | Phase 2/3 | Dynamic Harmonic Reg. (Rolling 1-Step Update) | **1.177** | 0.855 | 3.69% | 0.9713 | 5.82 | +0.015 | Best 1-Step Classical |
+| **ARIMA(2,1,2) (1-Step)** | Phase 2/3 | Box-Jenkins ARMA (Rolling 1-Step Update) | **1.219** | 0.868 | 3.76% | 0.9692 | 6.12 | +0.008 | 1-Step ARMA Baseline |
+| **Naive Persistence ($y_{t-1}$)** | Phase 2/3 | 1-Day Random Walk Persistence ($\hat{y}_t = y_{t-1}$) | **1.243** | 0.888 | 3.87% | 0.9680 | 6.35 | +0.004 | 1-Step Naive Baseline |
+
+### Regime B: Fixed 365-Day Multi-Step Horizon ($h = 1 \dots 365$ Steps Ahead, Zero Test Observations Used)
+| Model Architecture | Phase | Model Family / Mode | RMSE (°C) | MAE (°C) | MAPE (%) | $R^2$ Score | Max Error (°C) | Bias (°C) | Status |
+| :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Holt-Winters Damped** | **Phase 2** | **Triple Exp. Smoothing ($m=365, \phi=0.9891$)** | **2.129** | **1.657** | **7.13%** | **0.9061** | **7.28** | **+0.362** | 🥇 **Fixed 365-Day Champion** |
+| **Holt-Winters Additive** | Phase 2 | Triple Exp. Smoothing ($m=365$, Undamped) | **2.228** | 1.730 | 7.37% | 0.8972 | 7.55 | +0.616 | Fixed 365d Runner-Up |
+| **XGBoost (Direct 365d No-Lag)** | **Phase 3** | **Gradient Boosted Trees (`lag_365` + Harmonics Only)** | **2.305** | **1.824** | **7.83%** | **0.8900** | **6.73** | **+0.484** | **Best 365d ML (Beats SARIMAX)** |
+| **SARIMAX (Fourier $K=3$, 365d)** | Phase 2 | Dynamic Harmonic Reg. + $\text{ARIMA}(2,0,1)$ | **2.376** | 1.879 | 8.03% | 0.8831 | 6.63 | +0.550 | Harmonic 365d Classical |
+| **Seasonal Naive (365d)** | Phase 2 | Annual Persistence Baseline ($y_{t-365}$) | **2.909** | 2.243 | 9.69% | 0.8247 | 9.57 | -0.172 | Seasonal 365d Baseline |
+| **XGBoost (Recursive 365d)** | Phase 3 | Recursive 365-Step Rollout ($\hat{y}_{t-1}$ fed back) | **3.388** | 2.606 | 10.49% | 0.7623 | 9.85 | +0.412 | Recursive Error Accumulation |
+| **Classical ARIMA(2,1,2)** | Phase 2 | Box-Jenkins Non-Seasonal ($d=1$, Fixed 365d) | **7.244** | 6.470 | 29.69% | -0.0869 | 14.64 | +2.049 | Non-Seasonal Mean Reversion |
+| **Naive (Persistence, $y_T$)** | Phase 2 | Random Walk Baseline ($y_T$, Fixed 365d) | **7.403** | 6.648 | 29.81% | -0.1349 | 15.15 | +2.552 | Memoryless Baseline |
+| **Holt Linear Trend** | Phase 2 | Double Exp. Smoothing (Fixed 365d) | **7.412** | 6.648 | 30.00% | -0.1377 | 15.09 | +2.429 | Unbounded Linear Drift |
 | *Monthly SARIMA(1,1,1)×(1,1,1)₁₂* | *Phase 2* | *Monthly Aggregate Benchmark ($s=12$)* | *1.264* | *0.939* | *3.99%* | *0.9637* | *2.78* | *+0.445* | *12-Month Aggregate* |
 
 ---

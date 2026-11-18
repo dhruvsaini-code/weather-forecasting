@@ -76,11 +76,6 @@ if not os.path.exists(m2_fc_path) or not os.path.exists(m2_metrics_path):
     sys.exit("Error: Required Phase 2 benchmark files in 'milestone2_output/' not found.")
 
 daily = pd.read_csv(daily_path, parse_dates=["date"], index_col="date").sort_index()
-daily["tmean"] = daily["tmean"].interpolate(method="time").bfill().ffill()
-daily["tmax"] = daily["tmax"].interpolate(method="time").bfill().ffill()
-daily["tmin"] = daily["tmin"].interpolate(method="time").bfill().ffill()
-daily["humidity"] = daily["humidity"].interpolate(method="time").bfill().ffill()
-daily["rain"] = daily["rain"].fillna(0.0)
 daily["month"] = daily.index.month
 daily["year"] = daily.index.year
 daily["season"] = daily["month"].map(SEASONS)
@@ -89,7 +84,32 @@ m2_fc = pd.read_csv(m2_fc_path, parse_dates=["date"], index_col="date").sort_ind
 with open(m2_metrics_path, "r", encoding="utf-8") as f:
     m2_metrics = json.load(f)
 
+# 1.1 Split chronologically FIRST before any imputation to prevent lookahead/backfill leakage
 TEST_DAYS = 365
+train_raw = daily.iloc[:-TEST_DAYS].copy()
+test_raw = daily.iloc[-TEST_DAYS:].copy()
+
+# Audit missing values in train and test partitions prior to causal forward-fill
+num_cols = ["tmean", "tmax", "tmin", "humidity", "rain"]
+missing_audit = {
+    "train_nans_before_imputation": {c: int(train_raw[c].isna().sum()) for c in num_cols},
+    "test_nans_before_imputation": {c: int(test_raw[c].isna().sum()) for c in num_cols},
+    "imputation_method": "Post-split strictly causal forward-fill (.ffill() only; no pre-split .interpolate() and no .bfill())",
+}
+
+# Leakage-safe causal forward-fill (never uses .bfill() or two-sided .interpolate())
+train_medians = {c: float(train_raw[c].median()) for c in ["tmean", "tmax", "tmin", "humidity"]}
+for c in ["tmean", "tmax", "tmin", "humidity"]:
+    if pd.isna(train_raw[c].iloc[0]):
+        train_raw.iloc[0, train_raw.columns.get_loc(c)] = train_medians[c]
+    train_raw[c] = train_raw[c].ffill()
+train_raw["rain"] = train_raw["rain"].fillna(0.0)
+
+# Recombine causally so test_raw forward-fills strictly from the end of train_raw if any NaN exists
+daily = pd.concat([train_raw, test_raw], axis=0)
+for c in ["tmean", "tmax", "tmin", "humidity"]:
+    daily[c] = daily[c].ffill()
+daily["rain"] = daily["rain"].fillna(0.0)
 train_raw = daily.iloc[:-TEST_DAYS].copy()
 test_raw = daily.iloc[-TEST_DAYS:].copy()
 
@@ -99,19 +119,23 @@ assert np.allclose(test_raw["tmean"].values, m2_fc["actual_tmean"].values, atol=
 print(f"      ✓ Total daily series:    {len(daily):,} days ({daily.index.min():%Y-%m-%d} to {daily.index.max():%Y-%m-%d})")
 print(f"      ✓ Training partition:    {len(train_raw):,} days ({train_raw.index.min():%Y-%m-%d} to {train_raw.index.max():%Y-%m-%d})")
 print(f"      ✓ Test holdout window:   {len(test_raw):,} days ({test_raw.index.min():%Y-%m-%d} to {test_raw.index.max():%Y-%m-%d}) [100% aligned with Phase 2]")
+print(f"      ✓ Leakage-safe missing audit: Train NaNs={sum(missing_audit['train_nans_before_imputation'].values())}, Test NaNs={sum(missing_audit['test_nans_before_imputation'].values())} (Causal .ffill() only)")
 
 # =====================================================================
-# 2. ZERO-LEAKAGE FEATURE ENGINEERING
+# 2. ZERO-LEAKAGE FEATURE ENGINEERING (25 FEATURES)
 # =====================================================================
-print("\n[2/7] Engineering lag, shifted rolling, seasonal & exogenous features (zero leakage)...")
+print("\n[2/7] Engineering 25 lag, shifted rolling, seasonal & exogenous features (zero leakage)...")
 
-# Compute training-only day-of-year climatological baseline to prevent any test set leakage
+# Compute training-only day-of-year climatological baselines to prevent any test set leakage
 doy_climatology_train = train_raw.groupby(train_raw.index.dayofyear)["tmean"].mean()
+doy_dtr_train = (train_raw["tmax"] - train_raw["tmin"]).groupby(train_raw.index.dayofyear).mean()
+doy_hum_train = train_raw.groupby(train_raw.index.dayofyear)["humidity"].mean()
+doy_rain_train = train_raw.groupby(train_raw.index.dayofyear)["rain"].mean()
 
 
 def build_features(df_in, train_doy_map):
     """
-    Constructs 22 strictly causal features for target `tmean` at date t.
+    Constructs 25 strictly causal features for target `tmean` at date t.
     All target lags and rolling statistics use .shift(>=1) so day t is NEVER used.
     """
     feat = pd.DataFrame(index=df_in.index)
@@ -266,7 +290,7 @@ def compute_metrics(actual, predicted):
     }
 
 
-# 4.1 Primary Model: Tuned XGBoost (Full 22-Feature Set)
+# 4.1 Primary Model: Tuned XGBoost (Full 25-Feature Set, Rolling 1-Step-Ahead Operational Forecast)
 xgb_tuned = XGBRegressor(
     n_estimators=best_cv_cfg["n_estimators"],
     max_depth=best_cv_cfg["max_depth"],
@@ -280,7 +304,7 @@ xgb_tuned = XGBRegressor(
 xgb_tuned.fit(X_train, y_train)
 pred_xgb_tuned = pd.Series(xgb_tuned.predict(X_test), index=test_raw.index)
 
-# 4.2 Baseline ML Model: Untuned Default XGBoost
+# 4.2 Baseline ML Model: Untuned Default XGBoost (Rolling 1-Step-Ahead)
 xgb_default = XGBRegressor(
     n_estimators=100, max_depth=6, learning_rate=0.30, subsample=1.0, colsample_bytree=1.0,
     objective="reg:squarederror", random_state=42, n_jobs=4,
@@ -288,7 +312,7 @@ xgb_default = XGBRegressor(
 xgb_default.fit(X_train, y_train)
 pred_xgb_default = pd.Series(xgb_default.predict(X_test), index=test_raw.index)
 
-# 4.3 Ablation Model: Seasonal & Lag-365 Only (No Short-Term Lags 1..30 or Short-Term Rolling)
+# 4.3 Direct 365-Day Multi-Step XGBoost: Seasonal & Lag-365 Only (Zero test-period observations used)
 seasonal_only_cols = ["lag_365", "month", "dayofyear", "sin_doy_1", "cos_doy_1", "sin_doy_2", "cos_doy_2", "clim_doy_mean"]
 xgb_seasonal_only = XGBRegressor(
     n_estimators=250, max_depth=3, learning_rate=0.03, subsample=0.8, colsample_bytree=0.8,
@@ -297,7 +321,76 @@ xgb_seasonal_only = XGBRegressor(
 xgb_seasonal_only.fit(X_train[seasonal_only_cols], y_train)
 pred_xgb_seasonal_only = pd.Series(xgb_seasonal_only.predict(X_test[seasonal_only_cols]), index=test_raw.index)
 
-# 4.4 Feature Group Ablation Study (Quantifying each feature group's contribution)
+# 4.4 Recursive 365-Day Multi-Step XGBoost: Feeds own predicted tmean back into lags 1..30 & rolling windows
+# (Uses ZERO actual observations from the 2025-2026 test period; matches Phase 2 fixed 365-day horizon)
+history_tmean = list(train_raw["tmean"].values)
+history_dtr = list((train_raw["tmax"] - train_raw["tmin"]).values)
+history_hum = list(train_raw["humidity"].values)
+history_rain = list(train_raw["rain"].values)
+
+recursive_preds_list = []
+for dt in test_raw.index:
+    doy = dt.dayofyear
+    row_rec = {}
+    for l in [1, 2, 3, 7, 14, 30, 365]:
+        row_rec[f"lag_{l}"] = history_tmean[-l]
+    for w in [7, 14, 30]:
+        win_v = history_tmean[-w:]
+        row_rec[f"roll_mean_{w}"] = float(np.mean(win_v))
+        row_rec[f"roll_std_{w}"] = float(np.std(win_v, ddof=1))
+    row_rec["month"] = dt.month
+    row_rec["dayofyear"] = doy
+    row_rec["sin_doy_1"] = np.sin(2.0 * np.pi * doy / 365.25)
+    row_rec["cos_doy_1"] = np.cos(2.0 * np.pi * doy / 365.25)
+    row_rec["sin_doy_2"] = np.sin(4.0 * np.pi * doy / 365.25)
+    row_rec["cos_doy_2"] = np.cos(4.0 * np.pi * doy / 365.25)
+    row_rec["clim_doy_mean"] = float(doy_climatology_train.get(doy, np.mean(history_tmean)))
+    row_rec["temp_momentum_1d"] = history_tmean[-1] - history_tmean[-2]
+    row_rec["temp_anomaly_7d"] = history_tmean[-1] - row_rec["roll_mean_7"]
+    row_rec["lag1_dtr"] = history_dtr[-1]
+    row_rec["lag1_humidity"] = history_hum[-1]
+    row_rec["lag1_rain"] = history_rain[-1]
+    X_step_df = pd.DataFrame([row_rec])[feature_cols]
+    p_step = float(xgb_tuned.predict(X_step_df)[0])
+    recursive_preds_list.append(p_step)
+    history_tmean.append(p_step)
+    history_dtr.append(float(doy_dtr_train.get(doy, 10.0)))
+    history_hum.append(float(doy_hum_train.get(doy, 50.0)))
+    history_rain.append(float(doy_rain_train.get(doy, 0.0)))
+
+pred_xgb_recursive_365d = pd.Series(recursive_preds_list, index=test_raw.index)
+
+# 4.5 Rolling 1-Step-Ahead Classical Baselines (Fair 1-Day-Ahead Horizon Counterparts)
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+pred_naive_1step = daily["tmean"].shift(1).iloc[-TEST_DAYS:]
+
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+    arima_m2 = ARIMA(train_raw["tmean"], order=(2, 1, 2)).fit()
+    pred_arima_1step = pd.Series(
+        arima_m2.append(test_raw["tmean"]).fittedvalues.iloc[-TEST_DAYS:].values,
+        index=test_raw.index
+    )
+
+    def _build_fourier_3(dates):
+        d = dates.dayofyear
+        cols = []
+        for k in range(1, 4):
+            cols.extend([np.sin(2.0 * np.pi * k * d / 365.25), np.cos(2.0 * np.pi * k * d / 365.25)])
+        return np.column_stack(cols)
+
+    sar_m2 = SARIMAX(
+        train_raw["tmean"], order=(2, 0, 1), exog=_build_fourier_3(train_raw.index),
+        trend="c", enforce_stationarity=False, enforce_invertibility=False
+    ).fit(disp=False)
+    pred_sarimax_1step = pd.Series(
+        sar_m2.append(test_raw["tmean"], exog=_build_fourier_3(test_raw.index)).fittedvalues.iloc[-TEST_DAYS:].values,
+        index=test_raw.index
+    )
+
+# 4.6 Feature Group Ablation Study (Quantifying each feature group's contribution)
 lags_only_cols = ["lag_1", "lag_2", "lag_3", "lag_7", "lag_14", "lag_30", "lag_365"]
 lags_roll_cols = lags_only_cols + ["roll_mean_7", "roll_mean_14", "roll_mean_30", "roll_std_7", "roll_std_14", "roll_std_30"]
 lags_roll_seas_cols = lags_roll_cols + ["month", "dayofyear", "sin_doy_1", "cos_doy_1", "sin_doy_2", "cos_doy_2", "clim_doy_mean"]
@@ -321,18 +414,51 @@ for grp_name, cols_sub in ablation_groups:
     met_ab = compute_metrics(y_test, p_ab)
     ablation_results.append({"group": grp_name, "num_features": len(cols_sub), **met_ab})
 
-# 4.5 Combine Phase 2 Classical + Phase 3 XGBoost Metrics
+# 4.7 Combine Phase 2 Classical + Phase 3 XGBoost Metrics (Both Horizon Regimes Explicitly Separated)
 COMPARATIVE_METRICS = {
     "XGBoost (Tuned)": compute_metrics(y_test, pred_xgb_tuned),
     "XGBoost (Untuned Default)": compute_metrics(y_test, pred_xgb_default),
+    "SARIMAX (Rolling 1-Step)": compute_metrics(y_test, pred_sarimax_1step),
+    "ARIMA(2,1,2) (Rolling 1-Step)": compute_metrics(y_test, pred_arima_1step),
+    "Naive (Rolling 1-Step, y_{t-1})": compute_metrics(y_test, pred_naive_1step),
     "Holt-Winters Damped": m2_metrics["comparative_metrics_daily_365"]["Holt-Winters Damped"],
     "Holt-Winters Additive": m2_metrics["comparative_metrics_daily_365"]["Holt-Winters Additive"],
     "XGBoost (Seasonal No-Lag 365d)": compute_metrics(y_test, pred_xgb_seasonal_only),
     "SARIMAX (Fourier K=3, ARIMA(2,0,1))": m2_metrics["comparative_metrics_daily_365"]["SARIMAX (Fourier K=3, ARIMA(2,0,1))"],
     "Seasonal Naive": m2_metrics["comparative_metrics_daily_365"]["Seasonal Naive"],
+    "XGBoost (Recursive 365d Multi-Step)": compute_metrics(y_test, pred_xgb_recursive_365d),
     "ARIMA(2,1,2)": m2_metrics["comparative_metrics_daily_365"]["ARIMA(2,1,2)"],
     "Naive (Persistence)": m2_metrics["comparative_metrics_daily_365"]["Naive (Persistence)"],
     "Holt Linear Trend": m2_metrics["comparative_metrics_daily_365"]["Holt Linear Trend"],
+}
+
+HORIZON_COMPARISON = {
+    "rolling_1day_ahead": {
+        "description": "Rolling 1-day-ahead forecasting (h = 1 step ahead; uses actual historical observations up to day t-1 to predict day t)",
+        "models": {
+            "XGBoost (Tuned, Rolling 1-Step)": COMPARATIVE_METRICS["XGBoost (Tuned)"],
+            "XGBoost (Untuned, Rolling 1-Step)": COMPARATIVE_METRICS["XGBoost (Untuned Default)"],
+            "SARIMAX (Fourier K=3, Rolling 1-Step)": COMPARATIVE_METRICS["SARIMAX (Rolling 1-Step)"],
+            "ARIMA(2,1,2) (Rolling 1-Step)": COMPARATIVE_METRICS["ARIMA(2,1,2) (Rolling 1-Step)"],
+            "Naive Persistence (Rolling 1-Step, y_{t-1})": COMPARATIVE_METRICS["Naive (Rolling 1-Step, y_{t-1})"],
+        },
+        "champion": "XGBoost (Tuned, Rolling 1-Step)",
+    },
+    "fixed_365day_multistep": {
+        "description": "Fixed 365-day multi-step forecasting (h = 1..365 steps ahead from 2025-03-18; uses ZERO actual observations from the 2025-2026 test period)",
+        "models": {
+            "Holt-Winters Damped (Fixed 365d)": COMPARATIVE_METRICS["Holt-Winters Damped"],
+            "Holt-Winters Additive (Fixed 365d)": COMPARATIVE_METRICS["Holt-Winters Additive"],
+            "XGBoost (Direct 365d — Seasonal + Lag-365)": COMPARATIVE_METRICS["XGBoost (Seasonal No-Lag 365d)"],
+            "SARIMAX (Fourier K=3, Fixed 365d)": COMPARATIVE_METRICS["SARIMAX (Fourier K=3, ARIMA(2,0,1))"],
+            "Seasonal Naive (Fixed 365d, y_{t-365})": COMPARATIVE_METRICS["Seasonal Naive"],
+            "XGBoost (Recursive 365d Multi-Step Rollout)": COMPARATIVE_METRICS["XGBoost (Recursive 365d Multi-Step)"],
+            "ARIMA(2,1,2) (Fixed 365d)": COMPARATIVE_METRICS["ARIMA(2,1,2)"],
+            "Naive Persistence (Fixed 365d, y_T)": COMPARATIVE_METRICS["Naive (Persistence)"],
+            "Holt Linear Trend (Fixed 365d)": COMPARATIVE_METRICS["Holt Linear Trend"],
+        },
+        "champion": "Holt-Winters Damped (Fixed 365d)",
+    },
 }
 
 print("\n" + "=" * 90)
@@ -451,19 +577,27 @@ fc_out = m2_fc.copy()
 fc_out["pred_xgboost_tuned"] = np.round(pred_xgb_tuned.values, 4)
 fc_out["pred_xgboost_untuned"] = np.round(pred_xgb_default.values, 4)
 fc_out["pred_xgboost_seasonal_365d"] = np.round(pred_xgb_seasonal_only.values, 4)
+fc_out["pred_xgboost_recursive_365d"] = np.round(pred_xgb_recursive_365d.values, 4)
+fc_out["pred_sarimax_rolling_1step"] = np.round(pred_sarimax_1step.values, 4)
+fc_out["pred_arima_rolling_1step"] = np.round(pred_arima_1step.values, 4)
+fc_out["pred_naive_rolling_1step"] = np.round(pred_naive_1step.values, 4)
 fc_out.to_csv(os.path.join(OUT_DIR, "forecast_comparison.csv"))
 
 model_comp_rows = [
-    {"Model": "XGBoost (Tuned)", "Phase": "Phase 3", "Family": "Gradient Boosted Trees (Lag+Roll+Seas)", **COMPARATIVE_METRICS["XGBoost (Tuned)"]},
-    {"Model": "XGBoost (Untuned Default)", "Phase": "Phase 3", "Family": "Gradient Boosted Trees (Default)", **COMPARATIVE_METRICS["XGBoost (Untuned Default)"]},
-    {"Model": "Holt-Winters Damped", "Phase": "Phase 2", "Family": "Triple Exponential Smoothing (Damped)", **COMPARATIVE_METRICS["Holt-Winters Damped"]},
-    {"Model": "Holt-Winters Additive", "Phase": "Phase 2", "Family": "Triple Exponential Smoothing (Additive)", **COMPARATIVE_METRICS["Holt-Winters Additive"]},
-    {"Model": "XGBoost (Seasonal No-Lag 365d)", "Phase": "Phase 3 Ablation", "Family": "Gradient Boosted Trees (365d Horizon Only)", **COMPARATIVE_METRICS["XGBoost (Seasonal No-Lag 365d)"]},
-    {"Model": "SARIMAX (Fourier K=3, ARIMA(2,0,1))", "Phase": "Phase 2", "Family": "Dynamic Harmonic Regression", **COMPARATIVE_METRICS["SARIMAX (Fourier K=3, ARIMA(2,0,1))"]},
-    {"Model": "Seasonal Naive", "Phase": "Phase 2", "Family": "Annual Persistence Baseline (365d)", **COMPARATIVE_METRICS["Seasonal Naive"]},
-    {"Model": "ARIMA(2,1,2)", "Phase": "Phase 2", "Family": "Box-Jenkins Non-Seasonal ARMA", **COMPARATIVE_METRICS["ARIMA(2,1,2)"]},
-    {"Model": "Naive (Persistence)", "Phase": "Phase 2", "Family": "Random Walk Persistence Baseline", **COMPARATIVE_METRICS["Naive (Persistence)"]},
-    {"Model": "Holt Linear Trend", "Phase": "Phase 2", "Family": "Double Exponential Smoothing", **COMPARATIVE_METRICS["Holt Linear Trend"]},
+    {"Model": "XGBoost (Tuned)", "Phase": "Phase 3", "Horizon_Mode": "Rolling 1-Day-Ahead", "Family": "Gradient Boosted Trees (25 Features)", **COMPARATIVE_METRICS["XGBoost (Tuned)"]},
+    {"Model": "XGBoost (Untuned Default)", "Phase": "Phase 3", "Horizon_Mode": "Rolling 1-Day-Ahead", "Family": "Gradient Boosted Trees (Default)", **COMPARATIVE_METRICS["XGBoost (Untuned Default)"]},
+    {"Model": "SARIMAX (Rolling 1-Step)", "Phase": "Phase 2/3", "Horizon_Mode": "Rolling 1-Day-Ahead", "Family": "Dynamic Harmonic Regression (1-Step)", **COMPARATIVE_METRICS["SARIMAX (Rolling 1-Step)"]},
+    {"Model": "ARIMA(2,1,2) (Rolling 1-Step)", "Phase": "Phase 2/3", "Horizon_Mode": "Rolling 1-Day-Ahead", "Family": "Box-Jenkins ARMA (1-Step)", **COMPARATIVE_METRICS["ARIMA(2,1,2) (Rolling 1-Step)"]},
+    {"Model": "Naive (Rolling 1-Step, y_{t-1})", "Phase": "Phase 2/3", "Horizon_Mode": "Rolling 1-Day-Ahead", "Family": "1-Day Persistence Baseline", **COMPARATIVE_METRICS["Naive (Rolling 1-Step, y_{t-1})"]},
+    {"Model": "Holt-Winters Damped", "Phase": "Phase 2", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Triple Exponential Smoothing (Damped)", **COMPARATIVE_METRICS["Holt-Winters Damped"]},
+    {"Model": "Holt-Winters Additive", "Phase": "Phase 2", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Triple Exponential Smoothing (Additive)", **COMPARATIVE_METRICS["Holt-Winters Additive"]},
+    {"Model": "XGBoost (Seasonal No-Lag 365d)", "Phase": "Phase 3", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Gradient Boosted Trees (Direct 365d Horizon)", **COMPARATIVE_METRICS["XGBoost (Seasonal No-Lag 365d)"]},
+    {"Model": "SARIMAX (Fourier K=3, ARIMA(2,0,1))", "Phase": "Phase 2", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Dynamic Harmonic Regression (365d)", **COMPARATIVE_METRICS["SARIMAX (Fourier K=3, ARIMA(2,0,1))"]},
+    {"Model": "Seasonal Naive", "Phase": "Phase 2", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Annual Persistence Baseline (365d)", **COMPARATIVE_METRICS["Seasonal Naive"]},
+    {"Model": "XGBoost (Recursive 365d Multi-Step)", "Phase": "Phase 3", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Gradient Boosted Trees (Recursive 365d Rollout)", **COMPARATIVE_METRICS["XGBoost (Recursive 365d Multi-Step)"]},
+    {"Model": "ARIMA(2,1,2)", "Phase": "Phase 2", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Box-Jenkins Non-Seasonal ARMA (365d)", **COMPARATIVE_METRICS["ARIMA(2,1,2)"]},
+    {"Model": "Naive (Persistence)", "Phase": "Phase 2", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Random Walk Persistence Baseline (y_T)", **COMPARATIVE_METRICS["Naive (Persistence)"]},
+    {"Model": "Holt Linear Trend", "Phase": "Phase 2", "Horizon_Mode": "Fixed 365-Day Multi-Step", "Family": "Double Exponential Smoothing (365d)", **COMPARATIVE_METRICS["Holt Linear Trend"]},
 ]
 pd.DataFrame(model_comp_rows).to_csv(os.path.join(OUT_DIR, "model_comparison.csv"), index=False)
 
@@ -883,6 +1017,7 @@ metrics_payload = {
         "train_range": [train_raw.index.min().strftime("%Y-%m-%d"), train_raw.index.max().strftime("%Y-%m-%d")],
         "test_range": [test_raw.index.min().strftime("%Y-%m-%d"), test_raw.index.max().strftime("%Y-%m-%d")],
         "zero_leakage_perturbation_max_diff": leakage_diff,
+        "missing_value_audit": missing_audit,
     },
     "engineered_features": {
         "count": len(feature_cols),
@@ -910,6 +1045,7 @@ metrics_payload = {
         "depth_sensitivity": depth_sweep,
     },
     "comparative_metrics_daily_365": COMPARATIVE_METRICS,
+    "horizon_comparison": HORIZON_COMPARISON,
     "ablation_study": ablation_results,
     "feature_importance": {
         "gain_ranked": fi_gain_ranked,

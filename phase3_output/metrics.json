@@ -26,7 +26,24 @@
       "2025-03-19",
       "2026-03-18"
     ],
-    "zero_leakage_perturbation_max_diff": 0.0
+    "zero_leakage_perturbation_max_diff": 0.0,
+    "missing_value_audit": {
+      "train_nans_before_imputation": {
+        "tmean": 0,
+        "tmax": 0,
+        "tmin": 0,
+        "humidity": 0,
+        "rain": 0
+      },
+      "test_nans_before_imputation": {
+        "tmean": 0,
+        "tmax": 0,
+        "tmin": 0,
+        "humidity": 0,
+        "rain": 0
+      },
+      "imputation_method": "Post-split strictly causal forward-fill (.ffill() only; no pre-split .interpolate() and no .bfill())"
+    }
   },
   "engineered_features": {
     "count": 25,
@@ -278,6 +295,30 @@
       "Max_Error": 5.5,
       "Bias": 0.113
     },
+    "SARIMAX (Rolling 1-Step)": {
+      "RMSE": 1.177,
+      "MAE": 0.855,
+      "MAPE": 3.69,
+      "R2": 0.9713,
+      "Max_Error": 5.73,
+      "Bias": 0.079
+    },
+    "ARIMA(2,1,2) (Rolling 1-Step)": {
+      "RMSE": 1.219,
+      "MAE": 0.868,
+      "MAPE": 3.76,
+      "R2": 0.9692,
+      "Max_Error": 5.96,
+      "Bias": 0.003
+    },
+    "Naive (Rolling 1-Step, y_{t-1})": {
+      "RMSE": 1.243,
+      "MAE": 0.888,
+      "MAPE": 3.87,
+      "R2": 0.968,
+      "Max_Error": 5.61,
+      "Bias": 0.002
+    },
     "Holt-Winters Damped": {
       "RMSE": 2.129,
       "MAE": 1.657,
@@ -318,6 +359,14 @@
       "Max_Error": 9.57,
       "Bias": -0.172
     },
+    "XGBoost (Recursive 365d Multi-Step)": {
+      "RMSE": 3.388,
+      "MAE": 2.606,
+      "MAPE": 10.49,
+      "R2": 0.7623,
+      "Max_Error": 8.9,
+      "Bias": 2.003
+    },
     "ARIMA(2,1,2)": {
       "RMSE": 7.244,
       "MAE": 6.47,
@@ -341,6 +390,132 @@
       "R2": -0.1377,
       "Max_Error": 15.09,
       "Bias": 2.429
+    }
+  },
+  "horizon_comparison": {
+    "rolling_1day_ahead": {
+      "description": "Rolling 1-day-ahead forecasting (h = 1 step ahead; uses actual historical observations up to day t-1 to predict day t)",
+      "models": {
+        "XGBoost (Tuned, Rolling 1-Step)": {
+          "RMSE": 1.111,
+          "MAE": 0.81,
+          "MAPE": 3.48,
+          "R2": 0.9744,
+          "Max_Error": 5.7,
+          "Bias": 0.096
+        },
+        "XGBoost (Untuned, Rolling 1-Step)": {
+          "RMSE": 1.154,
+          "MAE": 0.837,
+          "MAPE": 3.57,
+          "R2": 0.9724,
+          "Max_Error": 5.5,
+          "Bias": 0.113
+        },
+        "SARIMAX (Fourier K=3, Rolling 1-Step)": {
+          "RMSE": 1.177,
+          "MAE": 0.855,
+          "MAPE": 3.69,
+          "R2": 0.9713,
+          "Max_Error": 5.73,
+          "Bias": 0.079
+        },
+        "ARIMA(2,1,2) (Rolling 1-Step)": {
+          "RMSE": 1.219,
+          "MAE": 0.868,
+          "MAPE": 3.76,
+          "R2": 0.9692,
+          "Max_Error": 5.96,
+          "Bias": 0.003
+        },
+        "Naive Persistence (Rolling 1-Step, y_{t-1})": {
+          "RMSE": 1.243,
+          "MAE": 0.888,
+          "MAPE": 3.87,
+          "R2": 0.968,
+          "Max_Error": 5.61,
+          "Bias": 0.002
+        }
+      },
+      "champion": "XGBoost (Tuned, Rolling 1-Step)"
+    },
+    "fixed_365day_multistep": {
+      "description": "Fixed 365-day multi-step forecasting (h = 1..365 steps ahead from 2025-03-18; uses ZERO actual observations from the 2025-2026 test period)",
+      "models": {
+        "Holt-Winters Damped (Fixed 365d)": {
+          "RMSE": 2.129,
+          "MAE": 1.657,
+          "MAPE": 7.13,
+          "R2": 0.9061,
+          "Max_Error": 7.28,
+          "Bias": 0.362
+        },
+        "Holt-Winters Additive (Fixed 365d)": {
+          "RMSE": 2.228,
+          "MAE": 1.73,
+          "MAPE": 7.37,
+          "R2": 0.8972,
+          "Max_Error": 7.55,
+          "Bias": 0.616
+        },
+        "XGBoost (Direct 365d \u2014 Seasonal + Lag-365)": {
+          "RMSE": 2.305,
+          "MAE": 1.824,
+          "MAPE": 7.83,
+          "R2": 0.89,
+          "Max_Error": 6.73,
+          "Bias": 0.484
+        },
+        "SARIMAX (Fourier K=3, Fixed 365d)": {
+          "RMSE": 2.376,
+          "MAE": 1.879,
+          "MAPE": 8.03,
+          "R2": 0.8831,
+          "Max_Error": 6.63,
+          "Bias": 0.55
+        },
+        "Seasonal Naive (Fixed 365d, y_{t-365})": {
+          "RMSE": 2.909,
+          "MAE": 2.243,
+          "MAPE": 9.69,
+          "R2": 0.8247,
+          "Max_Error": 9.57,
+          "Bias": -0.172
+        },
+        "XGBoost (Recursive 365d Multi-Step Rollout)": {
+          "RMSE": 3.388,
+          "MAE": 2.606,
+          "MAPE": 10.49,
+          "R2": 0.7623,
+          "Max_Error": 8.9,
+          "Bias": 2.003
+        },
+        "ARIMA(2,1,2) (Fixed 365d)": {
+          "RMSE": 7.244,
+          "MAE": 6.47,
+          "MAPE": 29.69,
+          "R2": -0.0869,
+          "Max_Error": 14.64,
+          "Bias": 2.049
+        },
+        "Naive Persistence (Fixed 365d, y_T)": {
+          "RMSE": 7.403,
+          "MAE": 6.648,
+          "MAPE": 29.81,
+          "R2": -0.1349,
+          "Max_Error": 15.15,
+          "Bias": 2.552
+        },
+        "Holt Linear Trend (Fixed 365d)": {
+          "RMSE": 7.412,
+          "MAE": 6.648,
+          "MAPE": 30.0,
+          "R2": -0.1377,
+          "Max_Error": 15.09,
+          "Bias": 2.429
+        }
+      },
+      "champion": "Holt-Winters Damped (Fixed 365d)"
     }
   },
   "ablation_study": [
