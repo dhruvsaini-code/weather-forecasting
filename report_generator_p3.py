@@ -546,6 +546,25 @@ def generate_ieee_pdf_report(metrics_data, out_dir, fig_dir):
     story.append(t_s)
     story.append(Spacer(1, 4))
 
+    # 7b. Experimental Multi-Year Future Forecast Lab (Apr 2026 - Mar 2030) & Live Web Dashboard Screenshots
+    story.append(Paragraph(
+        "<b>E. Multi-Year Future Forecast Lab (1 April 2026 – 31 March 2030):</b> To demonstrate long-range extrapolation beyond the historical cutoff "
+        "(18 March 2026), we retrained <i>Holt-Winters Damped</i> (phi = 0.9891), <i>XGBoost Recursive</i> (25 causal features with historical DOY climatology "
+        "for future exogenous inputs), and <i>XGBoost Direct Seasonal</i> (8 harmonic/calendar/lag-365 features) on all 11,035 historical observations, bridged "
+        "19–31 March 2026 (13 days), and generated <b>1,461 continuous daily predictions</b> (1 April 2026 – 31 March 2030, including leap day 2028-02-29). "
+        "Because no future ground-truth observations exist, accuracy metrics (RMSE/MAE) are never computed on 2026–2030; instead, inter-model differences "
+        "quantify <i>model disagreement</i> (mean 3-model spread = 2.40 °C; full-year 2027–2029 means: 25.1–25.2 °C HW Damped, 24.5 °C XGB Direct, 23.1–23.2 °C XGB Recursive).",
+        st_body
+    ))
+    f_fl = os.path.join(fig_dir, "08_future_forecast_lab_2026_2030.png")
+    if os.path.exists(f_fl):
+        story.append(RLImage(f_fl, width=6.8*inch, height=3.8*inch))
+        story.append(Paragraph("Fig. 8. Experimental Multi-Year Future Forecast Lab (1 Apr 2026 – 31 Mar 2030): 1,461 daily predictions, yearly comparison (*partial years 2026 & 2030), and seasonal model disagreement.", st_cap))
+    f_ui = os.path.join(fig_dir, "09_live_web_dashboard_screenshots.png")
+    if os.path.exists(f_ui):
+        story.append(RLImage(f_ui, width=6.8*inch, height=4.0*inch))
+        story.append(Paragraph("Fig. 9. Live Interactive Web Dashboard & REST API Screenshots (http://localhost:8080/): 365-Day Explorer, Phase 3 XGBoost Protocols, Future Forecast Lab, and 12-Mark Rubric.", st_cap))
+
     # 8. SECTION VI: CONCLUSION, LIMITATIONS, AND FUTURE WORK
     story.append(Paragraph("VI. CONCLUSION, LIMITATIONS, AND FUTURE WORK", st_h1))
     story.append(Paragraph(
@@ -809,6 +828,17 @@ def generate_ieee_docx_report(metrics_data, out_dir, fig_dir):
                     if i == 0:
                         run.bold = True
 
+    # 7b. Multi-Year Future Forecast Lab & Live Dashboard Screenshots (DOCX)
+    doc.add_paragraph(
+        "Experimental Multi-Year Future Forecast Lab (1 April 2026 – 31 March 2030): Models were retrained on all 11,035 historical days up to 18 March 2026, "
+        "bridging 19–31 March 2026 (13 days) to produce 1,461 daily predictions (including 2028-02-29). Inter-model differences represent model disagreement "
+        "(mean 3-model spread = 2.40 °C) rather than prediction error, as no future observations exist."
+    )
+    for fig_name in ["08_future_forecast_lab_2026_2030.png", "09_live_web_dashboard_screenshots.png"]:
+        fp = os.path.join(fig_dir, fig_name)
+        if os.path.exists(fp):
+            doc.add_picture(fp, width=DocxInches(6.2))
+
     # 8. Conclusion & Future Work
     add_sec_heading("VI. CONCLUSION, LIMITATIONS, AND FUTURE WORK")
     doc.add_paragraph(
@@ -959,7 +989,7 @@ def generate_phase3_presentation(metrics_data, out_dir, fig_dir):
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
     BLANK = prs.slide_layouts[6]
-    TOTAL_SLIDES = 12
+    TOTAL_SLIDES = 14
 
     NAVY, MID, LIGHT, ORANGE, GREY, WHITE, DARK_TEXT, EMERALD, ROSE = (
         "0B1F3A", "1F4E79", "DCE9F5", "F28C28", "6B7785", "FFFFFF", "1B2A3C", "10B981", "E11D48"
@@ -1297,35 +1327,69 @@ def generate_phase3_presentation(metrics_data, out_dir, fig_dir):
     ], size=10.5)
     insert_summary_banner(s11, "Scientific Takeaway: Use XGBoost for short-to-medium operational dispatch, and Holt-Winters Damped for 12-month seasonal planning.")
 
-    # SLIDE 12: CONCLUSION, FUTURE WORK & TEAM CONTRIBUTIONS
-    s12 = create_slide_scaffold(12, "11. Conclusion, Future Extensions & Team Contributions",
-        notes_text="Slide 12 (11:15-12:00): Summarize key achievements across Phases 1-3, future hybrid ensembles, and equal team contributions for viva Q&A.")
-    insert_structured_panel(s12, 0.5, 1.25, 4.0, 4.9, "Final Project Conclusions", [
+    # SLIDE 12: EXPERIMENTAL MULTI-YEAR FUTURE FORECAST LAB (APR 2026 - MAR 2030)
+    s12_fl = create_slide_scaffold(12, "11. Experimental Multi-Year Future Forecast Lab (Apr 2026 – Mar 2030)",
+        notes_text="Slide 12: Present the Multi-Year Future Forecast Lab (1,461 daily predictions, 2028 leap day, 13-day bridge gap, partial vs full years, and model disagreement).")
+    insert_figure(s12_fl, os.path.join(fig_dir, "08_future_forecast_lab_2026_2030.png"), 0.5, 1.25, 7.75, 4.95)
+    insert_structured_panel(s12_fl, 8.42, 1.25, 4.41, 4.95, "2026–2030 Experimental Lab Design", [
+        "• Horizon & Continuity:",
+        "  - Cutoff: 18 Mar 2026 | Bridge: 19–31 Mar 2026 (13d).",
+        "  - Target: 1 Apr 2026 – 31 Mar 2030 (1,461 days, incl. 2028-02-29).",
+        "• Three Selectable Models (Zero Future Actuals):",
+        "  - Holt-Winters Damped (m=365, phi=0.9891): 25.1–25.2 °C.",
+        "  - XGBoost Direct Seasonal (8 harmonic feats): 24.5 °C.",
+        "  - XGBoost Recursive (25 feats, DOY exo clim): 23.1–23.2 °C.",
+        "• Partial vs. Full Years Explicitly Distinguished:",
+        "  - 2026 (275d) & 2030 (90d) are partial; 2027–2029 are full.",
+        "• Model Disagreement (Not Error): Mean spread = 2.40 °C."
+    ], size=10.2)
+    insert_summary_banner(s12_fl, "EXPERIMENTAL LONG-RANGE FORECAST — NOT AN OPERATIONAL WEATHER FORECAST. Downloadable as Daily, Monthly & Yearly CSVs.")
+
+    # SLIDE 13: LIVE INTERACTIVE WEB DASHBOARD & API SCREENSHOTS
+    s13_ui = create_slide_scaffold(13, "12. Interactive Web Dashboard & Live Application Screenshots",
+        notes_text="Slide 13: Show the live localhost:8080 web dashboard screenshots covering the 365-Day Explorer, 3 XGBoost Protocols, Future Forecast Lab, and 12-Mark Rubric.")
+    insert_figure(s13_ui, os.path.join(fig_dir, "09_live_web_dashboard_screenshots.png"), 0.5, 1.22, 8.35, 5.0)
+    insert_structured_panel(s13_ui, 9.0, 1.22, 3.83, 5.0, "Live Web App & REST API", [
+        "• Unified Backend (server.py):",
+        "  - REST endpoints: /api/future/status, /forecast, /monthly, /yearly, /comparison, /download.",
+        "• 365-Day Explorer (#explorer):",
+        "  - Presets for Phase 3 XGBoost vs. Phase 2 Classical + 95% PI (95.3% empirical coverage).",
+        "• Models Page (#models):",
+        "  - Separates 3 XGBoost protocols, 7 daily classical models & Monthly SARIMA (1.84 °C).",
+        "• Future Forecast Lab (#future-lab):",
+        "  - Instant window summary table, zoom, year/season filters & CSV/PNG exports."
+    ], size=10.0)
+    insert_summary_banner(s13_ui, "Verified end-to-end live web application: http://localhost:8080/ — all charts & CSVs generated from real model outputs.")
+
+    # SLIDE 14: CONCLUSION, FUTURE WORK & TEAM CONTRIBUTIONS
+    s14 = create_slide_scaffold(14, "13. Conclusion, Future Extensions & Team Contributions",
+        notes_text="Slide 14: Summarize key achievements across Phases 1-3, future hybrid ensembles, and equal team contributions for viva Q&A.")
+    insert_structured_panel(s14, 0.5, 1.25, 4.0, 4.9, "Final Project Conclusions", [
         "• End-to-End Completion (1996–2026):",
-        "  - Phase 1: 11,035 clean daily records, STL Fs = 0.936, stationarity proven.",
-        "  - Phase 2: 7 classical models; Holt-Winters Damped achieved 2.129 °C RMSE.",
-        f"  - Phase 3: Tuned XGBoost achieved {xgb_t['RMSE']:.3f} °C RMSE, {xgb_t['MAE']:.3f} °C MAE, {xgb_t['MAPE']:.2f}% MAPE, R² = {xgb_t['R2']:.4f}.",
-        f"• Overall Gain: {nb['rmse_gain_vs_hwd']:.1f}% RMSE reduction over Phase 2 Champion and {nb['rmse_gain_vs_snaive']:.1f}% over Seasonal Naive."
-    ], size=10.5)
-    insert_structured_panel(s12, 4.68, 1.25, 3.85, 4.9, "Future Improvements", [
-        "• 1. Hybrid Classical-ML Stacking:",
-        "  - Combine Holt-Winters Damped seasonal state-space baseline with XGBoost residual learning.",
+        "  - Phase 1: 11,035 clean daily records (0.59% raw hourly missing -> 0.00% daily), STL Fs = 0.936.",
+        "  - Phase 2: 7 daily classical models; Holt-Winters Damped achieved 2.129 °C RMSE.",
+        f"  - Phase 3: XGBoost Rolling 1-Step achieved {xgb_t['RMSE']:.3f} °C RMSE (R² = {xgb_t['R2']:.4f}); Direct Seasonal {xgb_lh['RMSE']:.3f} °C; Recursive {xgb_rec['RMSE']:.3f} °C.",
+        "  - Future Lab: 1,461 daily predictions (2026–2030) across 3 models."
+    ], size=10.2)
+    insert_structured_panel(s14, 4.68, 1.25, 3.85, 4.9, "Future Improvements", [
+        "• 1. Multi-City Generalization:",
+        "  - Validate across Mumbai, Bengaluru & Chennai.",
         "• 2. Exogenous Synoptic Reanalysis:",
-        "  - Integrate ERA5 500 hPa geopotential height & wind vectors across multiple Indian cities.",
-        "• 3. Probabilistic Intervals:",
-        "  - Quantile XGBoost & Conformal Prediction for calibrated 95% prediction intervals."
-    ], size=10.5)
-    insert_structured_panel(s12, 8.71, 1.25, 4.12, 4.9, "Equal Team Contributions (Viva)", [
+        "  - Integrate ERA5 500 hPa pressure, wind & cloud cover.",
+        "• 3. Hybrid Stacking & Probabilistic Bands:",
+        "  - Combine HW Damped seasonal baselines with Quantile XGBoost for calibrated 95% intervals."
+    ], size=10.2)
+    insert_structured_panel(s14, 8.71, 1.25, 4.12, 4.9, "Equal Team Contributions (Viva)", [
         "Dhruv Saini (S24CSEU0818) — 50%:",
         "  • Phase 1 ETL & STL decomposition.",
         "  • Phase 2 Holt-Winters & ARIMA modeling.",
-        "  • Phase 3 lag/rolling feature pipeline, zero-leakage verification & IEEE report.",
+        "  • Phase 3 lag/rolling feature pipeline, Future Forecast Lab & IEEE report.",
         "Aarush Saxena (S24CSEU1682) — 50%:",
         "  • Phase 1 stationarity & anomaly audit.",
         "  • Phase 2 Fourier SARIMAX & residual tests.",
-        "  • Phase 3 TimeSeriesSplit tuning, feature ablation, visual diagnostics & viva deck."
-    ], size=10.5)
-    insert_summary_banner(s12, "Thank You! All code, datasets, IEEE reports (PDF/DOCX), and interactive dashboards are live and reproducible.")
+        "  • Phase 3 TimeSeriesSplit tuning, feature ablation, web dashboard & viva deck."
+    ], size=10.2)
+    insert_summary_banner(s14, "Thank You! All code, datasets, IEEE reports (PDF/DOCX), 14-slide PPTX, and live dashboard are reproducible.")
 
     prs.save(pptx_path)
     return pptx_path
