@@ -1007,21 +1007,25 @@ dialog img{{width:100%;max-height:80vh;object-fit:contain;background:#fff;border
       </div>
       <p>Translating a 2.13 °C classical forecast benchmark into municipal and infrastructure decisions for Delhi NCR.</p>
     </div>
+    <div style="margin-bottom:20px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--ochre);border-radius:8px;font-size:.9rem;color:var(--ink)">
+      <strong>Scope Clarification on Potential Applications:</strong>
+      Temperature forecasts may provide supporting information for power-grid planning, heat-risk awareness, and winter preparedness. These applications would require integration with electricity, health, and air-quality datasets before operational deployment.
+    </div>
     <div class="uses">
       <div class="use-card">
         <span class="use-metric">Summer MAE: {s_sp['MAE']:.2f} °C • RMSE: {s_sp['RMSE']:.2f} °C</span>
-        <h3>Power grid</h3>
-        <p>Summer demand in Delhi passes 8,000 MW from air-conditioning load. A summer MAE of {s_sp['MAE']:.2f} °C lets BSES and Tata Power reserve cooling capacity within a 5% operational buffer.</p>
+        <h3>Power-grid planning (Potential)</h3>
+        <p>Ambient temperature is a key driver of summer cooling demand in Delhi NCR. A seasonal temperature forecast (MAE {s_sp['MAE']:.2f} °C) may provide supporting input when integrated with electricity load datasets.</p>
       </div>
       <div class="use-card">
         <span class="use-metric">Heatwave (≥38 °C) MAE: {hw_ext['MAE']:.2f} °C ({hw_ext['count_days']}d)</span>
-        <h3>Public health</h3>
-        <p>Across {hw_ext['count_days']} extreme heatwave days (Tmax ≥ 38 °C), the model stays within {hw_ext['MAE']:.2f} °C MAE, supporting early yellow and orange heat-action advisories.</p>
+        <h3>Heat-risk awareness (Potential)</h3>
+        <p>Across {hw_ext['count_days']} extreme heatwave days (Tmax ≥ 38 °C), the model stays within {hw_ext['MAE']:.2f} °C MAE, offering supporting temperature context for public-health heat-risk awareness.</p>
       </div>
       <div class="use-card">
         <span class="use-metric">Cold Snap (≤8 °C) MAE: {cs_ext['MAE']:.2f} °C ({cs_ext['count_days']}d)</span>
-        <h3>Winter planning</h3>
-        <p>Across {cs_ext['count_days']} severe cold-wave days (Tmin ≤ 8 °C), error holds near {cs_ext['MAE']:.2f} °C MAE, aiding night-shelter capacity planning and smog-inversion alerts.</p>
+        <h3>Winter preparedness (Potential)</h3>
+        <p>Across {cs_ext['count_days']} severe cold-wave days (Tmin ≤ 8 °C), error holds near {cs_ext['MAE']:.2f} °C MAE, providing supporting temperature information for winter shelter and air-quality preparedness.</p>
       </div>
     </div>
 
@@ -1029,17 +1033,17 @@ dialog img{{width:100%;max-height:80vh;object-fit:contain;background:#fff;border
       <div class="phase-box">
         <small>Phase 1 • Completed</small>
         <h4>Synopsis &amp; Exploratory Audit</h4>
-        <p>Curated 264,840 hourly records into 11,035 daily observations (0% missing), proving F_s = 0.936 and stationarity.</p>
+        <p>Resampled 264,840 hourly records (0.59% raw missingness) into 11,035 daily observations (0.00% post-split missingness), proving F_s = 0.936 and stationarity.</p>
       </div>
       <div class="phase-box current">
-        <small>Phase 2 • Current Evaluation</small>
+        <small>Phase 2 • Classical Archive</small>
         <h4>Classical Forecasting Hub</h4>
-        <p>Benchmarked 7 classical families on a 365-day holdout; Holt-Winters Damped leads at 2.129 °C RMSE (R² = 0.9061).</p>
+        <p>Benchmarked 7 daily classical models on a 365-day holdout (Holt-Winters Damped leads at 2.129 °C RMSE, R² = 0.9061) plus 1 supplementary Monthly SARIMA model.</p>
       </div>
       <div class="phase-box">
-        <small>Phase 3 • Final Evaluation</small>
-        <h4>ML, Prophet &amp; Deep Learning</h4>
-        <p>Multivariate XGBoost/LightGBM, Meta Prophet, and BiLSTM neural architectures with exogenous humidity and pressure.</p>
+        <small>Phase 3 • Final Evaluation Completed (12 / 12 Marks)</small>
+        <h4>Advanced XGBoost &amp; Multi-Year Lab</h4>
+        <p>Regularized XGBoost with 25 causal features, 5-fold TimeSeriesSplit tuning, and 3 forecasting protocols (Rolling 1-Step 1.111 °C, Direct Seasonal 2.305 °C, Recursive 3.388 °C). <a href="../index.html" style="font-weight:600;text-decoration:underline">Open Phase 3 Dashboard →</a></p>
       </div>
     </div>
   </div>
