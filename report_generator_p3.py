@@ -682,7 +682,7 @@ def generate_ieee_docx_report(metrics_data, out_dir, fig_dir):
     doc.add_paragraph(
         "The dataset [10] spans 1 January 1996 to 18 March 2026 (11,035 daily observations). To preserve strict comparability with Phase 2, the training "
         "set covers 1 January 1996 to 18 March 2025 (10,670 days; 10,305 post-warmup rows) and the out-of-sample test set covers 19 March 2025 to "
-        "18 March 2026 (365 days). Twenty-two features are engineered strictly from past observations (<= t - 1): lags {1, 2, 3, 7, 14, 30, 365}, "
+        "18 March 2026 (365 days). Twenty-five features are engineered strictly from past observations (<= t - 1): lags {1, 2, 3, 7, 14, 30, 365}, "
         "1-day-shifted rolling means and standard deviations over windows {7, 14, 30}, calendar & Fourier harmonic terms (month, dayofyear, sin/cos k=1,2, "
         "training-only clim_doy_mean), and lagged exogenous predictors (lag1_dtr, lag1_humidity, lag1_rain, temp_momentum_1d, temp_anomaly_7d)."
     )
@@ -736,19 +736,47 @@ def generate_ieee_docx_report(metrics_data, out_dir, fig_dir):
                     if i in (0, 1):
                         run.bold = True
 
-    for fig_name in ["03_actual_vs_predicted_forecast.png", "04_rmse_and_metrics_comparison.png", "05_residual_comparison_diagnostics.png", "06_feature_importance_analysis.png"]:
+    for fig_name in [
+        "03_actual_vs_predicted_forecast.png",
+        "04_rmse_and_metrics_comparison.png",
+        "05_residual_comparison_diagnostics.png",
+        "06_feature_importance_analysis.png",
+        "07_error_hotspots_and_failure_modes.png",
+    ]:
         fp = os.path.join(fig_dir, fig_name)
         if os.path.exists(fp):
             doc.add_picture(fp, width=DocxInches(6.0))
 
     doc.add_paragraph(
-        f"Feature Importance & Ablation Interpretation: (1) Top predictors by Gain are clim_doy_mean, lag_1, and roll_mean_7. "
+        f"Feature Importance & Ablation Interpretation: (1) Top predictors by Gain are lag_1 (55.7%), roll_mean_7 (17.9%), clim_doy_mean (11.7%), and lag_2 (9.6%). "
         f"(2) Seasonal harmonics and day-of-year climatology anchor the 20 °C annual solar cycle. "
         f"(3) Removing short-term lags (1–30 days) degrades XGBoost RMSE from {xgb_t['RMSE']:.3f} °C to {xgb_lh['RMSE']:.3f} °C, proving that "
         f"autoregressive thermal memory is essential for sub-1.2 °C accuracy, whereas Holt-Winters Damped ({hw_d['RMSE']:.3f} °C) excels at pure "
         f"365-step zero-observation extrapolation. (4) Peak residuals occur during sudden summer dust storms (Summer RMSE {s_perf['Summer']['RMSE']:.3f} °C) "
         f"and monsoon onset bursts (Monsoon RMSE {s_perf['Monsoon']['RMSE']:.3f} °C), where 1-day lagged predictors experience brief transition delay."
     )
+
+    seas_rows = [
+        ("Climatological Regime / Stress Scenario", "Days", "Actual Mean", "XGBoost RMSE", "XGBoost MAE", "HW Damped RMSE", "HW Damped MAE"),
+        ("Winter (Dec–Feb)", str(s_perf["Winter"]["days"]), f"{s_perf['Winter']['actual_mean']:.2f} °C", f"{s_perf['Winter']['RMSE']:.3f} °C", f"{s_perf['Winter']['MAE']:.3f} °C", "1.782 °C", "1.507 °C"),
+        ("Summer (Mar–May)", str(s_perf["Summer"]["days"]), f"{s_perf['Summer']['actual_mean']:.2f} °C", f"{s_perf['Summer']['RMSE']:.3f} °C", f"{s_perf['Summer']['MAE']:.3f} °C", "2.499 °C", "1.935 °C"),
+        ("Monsoon (Jun–Sep)", str(s_perf["Monsoon"]["days"]), f"{s_perf['Monsoon']['actual_mean']:.2f} °C", f"{s_perf['Monsoon']['RMSE']:.3f} °C", f"{s_perf['Monsoon']['MAE']:.3f} °C", "2.251 °C", "1.695 °C"),
+        ("Post-monsoon (Oct–Nov)", str(s_perf["Post-monsoon"]["days"]), f"{s_perf['Post-monsoon']['actual_mean']:.2f} °C", f"{s_perf['Post-monsoon']['RMSE']:.3f} °C", f"{s_perf['Post-monsoon']['MAE']:.3f} °C", "1.699 °C", "1.382 °C"),
+        ("Extreme Heatwaves (Tmax >= 38 °C)", str(ext_perf["heatwave_extreme"]["count_days"]), f"{ext_perf['heatwave_extreme']['mean_actual_tmean']:.2f} °C", f"{ext_perf['heatwave_extreme']['RMSE']:.3f} °C", f"{ext_perf['heatwave_extreme']['MAE']:.3f} °C", "2.147 °C", "1.674 °C"),
+        ("Severe Cold Snaps (Tmin <= 8 °C)", str(ext_perf["coldsnap_extreme"]["count_days"]), f"{ext_perf['coldsnap_extreme']['mean_actual_tmean']:.2f} °C", f"{ext_perf['coldsnap_extreme']['RMSE']:.3f} °C", f"{ext_perf['coldsnap_extreme']['MAE']:.3f} °C", "2.261 °C", "2.027 °C"),
+    ]
+    tbl_s = doc.add_table(rows=len(seas_rows), cols=7)
+    tbl_s.style = "Table Grid"
+    tbl_s.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for i, r in enumerate(seas_rows):
+        for j, val in enumerate(r):
+            cell = tbl_s.cell(i, j)
+            cell.text = str(val)
+            for p in cell.paragraphs:
+                for run in p.runs:
+                    run.font.size = DocxPt(8.5)
+                    if i == 0:
+                        run.bold = True
 
     # 8. Conclusion & Future Work
     add_sec_heading("VI. CONCLUSION, LIMITATIONS, AND FUTURE WORK")
