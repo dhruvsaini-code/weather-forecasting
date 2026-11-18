@@ -1075,12 +1075,15 @@ from report_generator_p3 import (
     generate_ieee_docx_report,
     generate_ieee_markdown_report,
     generate_phase3_presentation,
+    generate_phase3_interactive_dashboard,
 )
 
 pdf_file = generate_ieee_pdf_report(metrics_payload, OUT_DIR, FIG_DIR)
 docx_file = generate_ieee_docx_report(metrics_payload, OUT_DIR, FIG_DIR)
 md_file = generate_ieee_markdown_report(metrics_payload, OUT_DIR)
 pptx_file = generate_phase3_presentation(metrics_payload, OUT_DIR, FIG_DIR)
+html_root = generate_phase3_interactive_dashboard(metrics_payload, "index.html", is_phase3_standalone=False)
+html_p3 = generate_phase3_interactive_dashboard(metrics_payload, os.path.join(OUT_DIR, "index.html"), is_phase3_standalone=True)
 
 print(f"      ✓ Saved JSON Audit:          {os.path.join(OUT_DIR, 'metrics.json')}")
 print(f"      ✓ Saved Forecast CSV:        {os.path.join(OUT_DIR, 'forecast_comparison.csv')}")
@@ -1090,6 +1093,7 @@ print(f"      ✓ Saved IEEE Final PDF:      {pdf_file}")
 print(f"      ✓ Saved IEEE Final DOCX:     {docx_file}")
 print(f"      ✓ Saved IEEE Final Markdown: {md_file}")
 print(f"      ✓ Saved Phase 3 Viva PPTX:   {pptx_file}")
+print(f"      ✓ Saved Interactive Web App: {html_root} & {html_p3}")
 print("\n" + "=" * 88)
 print("✅ PHASE 3 PIPELINE EXECUTION COMPLETED SUCCESSFULLY!")
 print("=" * 88)
