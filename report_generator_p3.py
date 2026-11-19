@@ -1392,6 +1392,35 @@ def generate_phase3_presentation(metrics_data, out_dir, fig_dir):
     insert_summary_banner(s14, "Thank You! All code, datasets, IEEE reports (PDF/DOCX), 14-slide PPTX, and live dashboard are reproducible.")
 
     prs.save(pptx_path)
+
+    # Ensure strict OOXML compatibility for Apple Keynote & PowerPoint:
+    # 1) Fix <p:sldSz type="screen16x9"> to match 13.333x7.5 in widescreen dimensions
+    # 2) Add <p:notesMasterIdLst> when python-pptx attaches notesMaster1.xml
+    import zipfile, shutil, xml.etree.ElementTree as ET
+    tmp_pptx = pptx_path + ".tmp"
+    with zipfile.ZipFile(pptx_path, "r") as zin:
+        rels_xml = zin.read("ppt/_rels/presentation.xml.rels").decode("utf-8")
+        rels_root = ET.fromstring(rels_xml)
+        notes_rid = None
+        for rel in rels_root:
+            if rel.attrib.get("Type", "").endswith("/notesMaster"):
+                notes_rid = rel.attrib.get("Id")
+                break
+        pres_xml = zin.read("ppt/presentation.xml").decode("utf-8")
+        pres_xml = pres_xml.replace('type="screen4x3"', 'type="screen16x9"')
+        if notes_rid and "<p:notesMasterIdLst>" not in pres_xml:
+            pres_xml = pres_xml.replace(
+                "</p:sldMasterIdLst>",
+                f'</p:sldMasterIdLst><p:notesMasterIdLst><p:notesMasterId r:id="{notes_rid}"/></p:notesMasterIdLst>',
+                1,
+            )
+        with zipfile.ZipFile(tmp_pptx, "w", zipfile.ZIP_DEFLATED) as zout:
+            for item in zin.infolist():
+                if item.filename == "ppt/presentation.xml":
+                    zout.writestr(item, pres_xml.encode("utf-8"))
+                else:
+                    zout.writestr(item, zin.read(item.filename))
+    shutil.move(tmp_pptx, pptx_path)
     return pptx_path
 
 
