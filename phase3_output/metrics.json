@@ -390,6 +390,54 @@
       "R2": -0.1377,
       "Max_Error": 15.09,
       "Bias": 2.429
+    },
+    "Ensemble Stacking (XGB+RF+HGB, 1-Step)": {
+      "RMSE": 1.1105,
+      "MAE": 0.8069,
+      "MAPE": 3.467,
+      "R2": 0.9745,
+      "Max_Error": 5.679,
+      "Bias": 0.0871
+    },
+    "GRU (Deep Learning, Rolling 1-Step)": {
+      "RMSE": 1.1179,
+      "MAE": 0.8286,
+      "MAPE": 3.536,
+      "R2": 0.9741,
+      "Max_Error": 5.223,
+      "Bias": 0.1395
+    },
+    "LSTM (Deep Learning, Rolling 1-Step)": {
+      "RMSE": 1.1372,
+      "MAE": 0.8547,
+      "MAPE": 3.613,
+      "R2": 0.9732,
+      "Max_Error": 5.038,
+      "Bias": 0.2068
+    },
+    "Simple RNN (Deep Learning, Rolling 1-Step)": {
+      "RMSE": 1.1676,
+      "MAE": 0.8726,
+      "MAPE": 3.841,
+      "R2": 0.9718,
+      "Max_Error": 5.289,
+      "Bias": 0.0577
+    },
+    "Hybrid Ensemble (HW Damped + XGB Direct, 365d)": {
+      "RMSE": 2.0991,
+      "MAE": 1.6474,
+      "MAPE": 7.085,
+      "R2": 0.9087,
+      "Max_Error": 6.598,
+      "Bias": 0.4044
+    },
+    "Meta Prophet (Fixed 365d)": {
+      "RMSE": 2.2551,
+      "MAE": 1.7879,
+      "MAPE": 7.631,
+      "R2": 0.8947,
+      "Max_Error": 6.206,
+      "Bias": 0.3333
     }
   },
   "horizon_comparison": {
@@ -435,6 +483,38 @@
           "R2": 0.968,
           "Max_Error": 5.61,
           "Bias": 0.002
+        },
+        "Ensemble Stacking (XGB+RF+HGB, 1-Step)": {
+          "RMSE": 1.1105,
+          "MAE": 0.8069,
+          "MAPE": 3.467,
+          "R2": 0.9745,
+          "Max_Error": 5.679,
+          "Bias": 0.0871
+        },
+        "GRU (Deep Learning, Rolling 1-Step)": {
+          "RMSE": 1.1179,
+          "MAE": 0.8286,
+          "MAPE": 3.536,
+          "R2": 0.9741,
+          "Max_Error": 5.223,
+          "Bias": 0.1395
+        },
+        "LSTM (Deep Learning, Rolling 1-Step)": {
+          "RMSE": 1.1372,
+          "MAE": 0.8547,
+          "MAPE": 3.613,
+          "R2": 0.9732,
+          "Max_Error": 5.038,
+          "Bias": 0.2068
+        },
+        "Simple RNN (Deep Learning, Rolling 1-Step)": {
+          "RMSE": 1.1676,
+          "MAE": 0.8726,
+          "MAPE": 3.841,
+          "R2": 0.9718,
+          "Max_Error": 5.289,
+          "Bias": 0.0577
         }
       },
       "champion": "XGBoost (Tuned, Rolling 1-Step)"
@@ -513,6 +593,22 @@
           "R2": -0.1377,
           "Max_Error": 15.09,
           "Bias": 2.429
+        },
+        "Hybrid Ensemble (HW Damped + XGB Direct, 365d)": {
+          "RMSE": 2.0991,
+          "MAE": 1.6474,
+          "MAPE": 7.085,
+          "R2": 0.9087,
+          "Max_Error": 6.598,
+          "Bias": 0.4044
+        },
+        "Meta Prophet (Fixed 365d)": {
+          "RMSE": 2.2551,
+          "MAE": 1.7879,
+          "MAPE": 7.631,
+          "R2": 0.8947,
+          "Max_Error": 6.206,
+          "Bias": 0.3333
         }
       },
       "champion": "Holt-Winters Damped (Fixed 365d)"
@@ -1095,5 +1191,35 @@
       "Bias": 0.096
     },
     "improvement_over_phase2_champion_pct": 47.82
+  },
+  "deep_learning_and_prophet_details": {
+    "lookback_days": 30,
+    "dl_features": [
+      "tmean",
+      "dtr",
+      "humidity",
+      "rain",
+      "sin_doy_1",
+      "cos_doy_1"
+    ],
+    "dl_validation_rmse": {
+      "RNN": 1.0550815552560746,
+      "LSTM": 0.9582820270459919,
+      "GRU": 0.9531651785464764
+    },
+    "ensemble_stacking_weights": {
+      "XGBoost_Tuned": 0.6684,
+      "RandomForest": 0.1761,
+      "HistGradientBoosting": 0.1555
+    },
+    "hybrid_365d_weights": {
+      "Holt_Winters_Damped": 0.65,
+      "XGBoost_Direct_Seasonal": 0.35
+    },
+    "prophet_config": {
+      "yearly_seasonality": true,
+      "weekly_seasonality": false,
+      "changepoint_prior_scale": 0.05
+    }
   }
 }

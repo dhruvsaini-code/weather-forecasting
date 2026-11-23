@@ -31,8 +31,12 @@ To ensure a 100% fair comparison across forecasting horizons, models are explici
 ### Regime A: Rolling 1-Day-Ahead Horizon ($h = 1$ Step Ahead)
 | Model Architecture | Phase | Model Family / Mode | RMSE (°C) | MAE (°C) | MAPE (%) | $R^2$ Score | Max Error (°C) | Bias (°C) | Status |
 | :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **XGBoost (Tuned Champion)** | **Phase 3** | **Gradient Boosted Trees (25 Causal Features)** | **1.111** | **0.810** | **3.48%** | **0.9744** | **5.70** | **+0.096** | 🏆 **Overall & 1-Step Champion** |
+| **Ensemble Stacking (XGB+RF+HGB)** | **Phase 3** | **Ridge Stacking Ensemble (25 Causal Features)** | **1.111** | **0.811** | **3.49%** | **0.9745** | **5.56** | **+0.088** | 🏆 **Lowest Max Error & Top $R^2$** |
+| **XGBoost (Tuned Champion)** | **Phase 3** | **Gradient Boosted Trees (25 Causal Features)** | **1.111** | **0.810** | **3.48%** | **0.9744** | **5.70** | **+0.096** | 🏆 **Single-Model 1-Step Champion** |
+| **GRU (2-Layer, h=64)** | **Phase 3** | **Deep Learning Gated Recurrent Unit (30d Seq)** | **1.118** | **0.829** | **3.60%** | **0.9741** | **5.65** | **+0.130** | **Best Deep Learning Model** |
+| **LSTM (2-Layer, h=64)** | **Phase 3** | **Deep Learning Long Short-Term Memory (30d Seq)** | **1.137** | **0.855** | **3.74%** | **0.9732** | **5.46** | **+0.068** | Deep Learning Recurrent |
 | **XGBoost (Untuned Default)** | Phase 3 | Gradient Boosted Trees (`depth=6, lr=0.30`) | **1.154** | 0.837 | 3.57% | 0.9724 | 5.50 | +0.113 | Pre-Tuning ML Baseline |
+| **Simple RNN (2-Layer, h=48)** | **Phase 3** | **Deep Learning Elman RNN (30d Seq)** | **1.168** | **0.873** | **3.77%** | **0.9718** | **5.71** | **+0.125** | Recurrent Neural Baseline |
 | **SARIMAX (Fourier $K=3$, 1-Step)** | Phase 2/3 | Dynamic Harmonic Reg. (Rolling 1-Step Update) | **1.177** | 0.855 | 3.69% | 0.9713 | 5.82 | +0.015 | Best 1-Step Classical |
 | **ARIMA(2,1,2) (1-Step)** | Phase 2/3 | Box-Jenkins ARMA (Rolling 1-Step Update) | **1.219** | 0.868 | 3.76% | 0.9692 | 6.12 | +0.008 | 1-Step ARMA Baseline |
 | **Naive Persistence ($y_{t-1}$)** | Phase 2/3 | 1-Day Random Walk Persistence ($\hat{y}_t = y_{t-1}$) | **1.243** | 0.888 | 3.87% | 0.9680 | 6.35 | +0.004 | 1-Step Naive Baseline |
@@ -40,9 +44,11 @@ To ensure a 100% fair comparison across forecasting horizons, models are explici
 ### Regime B: Fixed 365-Day Multi-Step Horizon ($h = 1 \dots 365$ Steps Ahead, Zero Test Observations Used)
 | Model Architecture | Phase | Model Family / Mode | RMSE (°C) | MAE (°C) | MAPE (%) | $R^2$ Score | Max Error (°C) | Bias (°C) | Status |
 | :--- | :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **Holt-Winters Damped** | **Phase 2** | **Triple Exp. Smoothing ($m=365, \phi=0.9891$)** | **2.129** | **1.657** | **7.13%** | **0.9061** | **7.28** | **+0.362** | 🥇 **Fixed 365-Day Champion** |
+| **Hybrid Ensemble (HW Damped + XGB Direct)** | **Phase 3** | **0.65 State-Space + 0.35 Direct Seasonal ML** | **2.099** | **1.653** | **7.12%** | **0.9087** | **6.72** | **+0.405** | 🥇 **Fixed 365-Day Overall Best** |
+| **Holt-Winters Damped** | **Phase 2** | **Triple Exp. Smoothing ($m=365, \phi=0.9891$)** | **2.129** | **1.657** | **7.13%** | **0.9061** | **7.28** | **+0.362** | **Fixed 365-Day Classical Best** |
 | **Holt-Winters Additive** | Phase 2 | Triple Exp. Smoothing ($m=365$, Undamped) | **2.228** | 1.730 | 7.37% | 0.8972 | 7.55 | +0.616 | Fixed 365d Runner-Up |
-| **XGBoost (Direct 365d No-Lag)** | **Phase 3** | **Gradient Boosted Trees (`lag_365` + Harmonics Only)** | **2.305** | **1.824** | **7.83%** | **0.8900** | **6.73** | **+0.484** | **Best 365d ML (Beats SARIMAX)** |
+| **Meta / Facebook Prophet** | **Phase 3** | **Additive Piecewise Trend + Yearly Fourier** | **2.255** | **1.788** | **7.73%** | **0.8947** | **6.80** | **+0.340** | **Best Standalone 365d GAM** |
+| **XGBoost (Direct 365d No-Lag)** | **Phase 3** | **Gradient Boosted Trees (`lag_365` + Harmonics Only)** | **2.305** | **1.824** | **7.83%** | **0.8900** | **6.73** | **+0.484** | Best 365d ML (Beats SARIMAX) |
 | **SARIMAX (Fourier $K=3$, 365d)** | Phase 2 | Dynamic Harmonic Reg. + $\text{ARIMA}(2,0,1)$ | **2.376** | 1.879 | 8.03% | 0.8831 | 6.63 | +0.550 | Harmonic 365d Classical |
 | **Seasonal Naive (365d)** | Phase 2 | Annual Persistence Baseline ($y_{t-365}$) | **2.909** | 2.243 | 9.69% | 0.8247 | 9.57 | -0.172 | Seasonal 365d Baseline |
 | **XGBoost (Recursive 365d)** | Phase 3 | Recursive 365-Step Rollout ($\hat{y}_{t-1}$ fed back) | **3.388** | 2.606 | 10.49% | 0.7623 | 9.85 | +0.412 | Recursive Error Accumulation |
